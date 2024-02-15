@@ -1,6 +1,14 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 
+const Display = ({ text }) => {
+  return (
+    <>
+      <p>{text}</p>
+    </>
+  );
+};
+
 const Button = ({ onClick, text }) => {
   return (
     <>
@@ -21,15 +29,26 @@ const App = () => {
     'The only way to go fast, is to go well.',
   ];
 
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState('');
+
+  function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+  }
 
   const handleOnClick = () => {
-    return console.log('clicked');
+    setSelected(anecdotes[getRandomInt(0, anecdotes.length)]);
   };
 
   return (
     <div>
-      <Button onCLick={handleOnClick} text='next ancedote' />
+      <div>
+        <Display text={selected} />
+      </div>
+      <div>
+        <Button onClick={handleOnClick} text='next ancedote' />
+      </div>
     </div>
   );
 };
