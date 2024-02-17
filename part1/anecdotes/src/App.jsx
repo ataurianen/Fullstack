@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 
-const Display = ({ text }) => {
+const Display = ({ text, votes }) => {
   return (
     <>
       <p>{text}</p>
+      <p>Has {votes} votes</p>
     </>
   );
 };
@@ -29,7 +30,8 @@ const App = () => {
     'The only way to go fast, is to go well.',
   ];
 
-  const [selected, setSelected] = useState('');
+  const [selected, setSelected] = useState(0);
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0));
 
   function getRandomInt(min, max) {
     const minCeiled = Math.ceil(min);
@@ -37,17 +39,24 @@ const App = () => {
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
   }
 
-  const handleOnClick = () => {
-    setSelected(anecdotes[getRandomInt(0, anecdotes.length)]);
+  const handleNextClick = () => {
+    setSelected(getRandomInt(0, anecdotes.length));
+  };
+
+  const handleVoteClick = () => {
+    const copyVotes = [...votes];
+    copyVotes[selected] += 1;
+    setVotes(copyVotes);
   };
 
   return (
     <div>
       <div>
-        <Display text={selected} />
+        <Display text={anecdotes[selected]} votes={votes[selected]} />
       </div>
       <div>
-        <Button onClick={handleOnClick} text='next ancedote' />
+        <Button onClick={handleVoteClick} text='vote' />
+        <Button onClick={handleNextClick} text='next ancedote' />
       </div>
     </div>
   );
