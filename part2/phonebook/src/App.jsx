@@ -5,23 +5,30 @@ const Header = ({ text }) => {
   return <h2>{text}</h2>;
 };
 
-const Person = ({ name }) => {
-  return <p>{name}</p>;
+const Person = ({ name, number }) => {
+  return (
+    <p>
+      {name} {number}
+    </p>
+  );
 };
 
 const People = ({ persons }) => {
   return (
     <div>
       {persons.map((person) => (
-        <Person key={person.name} name={person.name} />
+        <Person key={person.name} name={person.name} number={person.number} />
       ))}
     </div>
   );
 };
 
 const App = () => {
-  const [persons, setPersons] = useState([{ name: 'Arto Hellas' }]);
+  const [persons, setPersons] = useState([
+    { name: 'Arto Hellas', number: '040-1234567' },
+  ]);
   const [newName, setNewName] = useState('');
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
 
   const addPerson = (e) => {
     e.preventDefault();
@@ -30,16 +37,22 @@ const App = () => {
     } else {
       const personObject = {
         name: newName,
+        number: newPhoneNumber,
       };
 
       setPersons(persons.concat(personObject));
     }
 
     setNewName('');
+    setNewPhoneNumber('');
   };
 
-  const handleInputChange = (e) => {
+  const handleNameInputChange = (e) => {
     setNewName(e.target.value);
+  };
+
+  const handleNumberInputChange = (e) => {
+    setNewPhoneNumber(e.target.value);
   };
 
   return (
@@ -47,7 +60,11 @@ const App = () => {
       <Header text={'Phonebook'} />
       <form onSubmit={addPerson}>
         <div>
-          Name: <input value={newName} onChange={handleInputChange} />
+          Name: <input value={newName} onChange={handleNameInputChange} />
+        </div>
+        <div>
+          Number:{' '}
+          <input value={newPhoneNumber} onChange={handleNumberInputChange} />
         </div>
         <div>
           <button type='submit'>add</button>
