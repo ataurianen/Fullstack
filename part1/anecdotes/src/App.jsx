@@ -1,6 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 
+const Header = ({ text }) => {
+  return <h1>{text}</h1>;
+};
+
 const Display = ({ text, votes }) => {
   return (
     <>
@@ -48,15 +52,28 @@ const App = () => {
     copyVotes[selected] += 1;
     setVotes(copyVotes);
   };
+  const maxVotesIndex = () => {
+    return votes.indexOf(Math.max(...votes));
+  };
 
   return (
     <div>
+      <div>
+        <Header text='Anecddote of the day' />
+      </div>
       <div>
         <Display text={anecdotes[selected]} votes={votes[selected]} />
       </div>
       <div>
         <Button onClick={handleVoteClick} text='vote' />
         <Button onClick={handleNextClick} text='next ancedote' />
+      </div>
+      <Header text='Anecdote with most votes' />
+      <div>
+        <Display
+          text={anecdotes[maxVotesIndex()]}
+          votes={votes[maxVotesIndex()]}
+        />
       </div>
     </div>
   );
