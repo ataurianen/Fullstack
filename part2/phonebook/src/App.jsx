@@ -1,54 +1,9 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-
-const Header = ({ text }) => {
-  return <h2>{text}</h2>;
-};
-
-const Person = ({ name, number }) => {
-  return (
-    <p>
-      {name} {number}
-    </p>
-  );
-};
-
-const Persons = ({ persons, filter }) => {
-  const listOfPeople = persons.filter((person) => person.name.includes(filter));
-  return (
-    <div>
-      {listOfPeople.map((person) => (
-        <Person key={person.name} name={person.name} number={person.number} />
-      ))}
-    </div>
-  );
-};
-
-const Filter = ({ filter, onChange }) => {
-  return (
-    <div>
-      Filter shown with
-      <input value={filter} onChange={onChange} />
-    </div>
-  );
-};
-
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.onSubmit}>
-      <div>
-        Name: <input value={props.valueName} onChange={props.onChangeName} />
-      </div>
-      <div>
-        Number:{' '}
-        <input value={props.valuePhone} onChange={props.onChangePhone} />
-      </div>
-      <div>
-        <button type='submit'>add</button>
-      </div>
-    </form>
-  );
-};
+import Persons from './components/Persons';
+import Filter from './components/Filter';
+import PersonForm from './components/PersonForm';
+import Header from './components/Header';
 
 const App = () => {
   const [persons, setPersons] = useState([
