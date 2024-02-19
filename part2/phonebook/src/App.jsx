@@ -4,7 +4,7 @@ import Persons from './components/Persons';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Header from './components/Header';
-import axios from 'axios';
+import phonebookService from './services/phonebooks';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,8 +13,8 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then((response) => {
-      setPersons(response.data);
+    phonebookService.getAll().then((initialPersons) => {
+      setPersons(initialPersons);
     });
   }, []);
 
@@ -28,7 +28,9 @@ const App = () => {
         number: newPhoneNumber,
       };
 
-      setPersons(persons.concat(personObject));
+      phonebookService.create(personObject).then((returnedPersons) => {
+        setPersons(persons.concat(returnedPersons));
+      });
     }
 
     setNewName('');
