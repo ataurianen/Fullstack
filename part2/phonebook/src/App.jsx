@@ -4,7 +4,7 @@ import Persons from './components/Persons';
 import Filter from './components/Filter';
 import PersonForm from './components/PersonForm';
 import Header from './components/Header';
-import phonebookService from './services/phonebooks';
+import personService from './services/persons';
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,7 +13,7 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    phonebookService.getAll().then((initialPersons) => {
+    personService.getAll().then((initialPersons) => {
       setPersons(initialPersons);
     });
   }, []);
@@ -28,7 +28,7 @@ const App = () => {
         number: newPhoneNumber,
       };
 
-      phonebookService.create(personObject).then((returnedPersons) => {
+      personService.create(personObject).then((returnedPersons) => {
         setPersons(persons.concat(returnedPersons));
       });
     }
@@ -49,6 +49,20 @@ const App = () => {
     setFilter(e.target.value);
   };
 
+  const handleDeleteClick = (id) => {
+    const person = persons.find((person) => person.id === id);
+    console.log(person);
+    if (window.confirm(`Do you really want to delete ${person.name}?`)) {
+      personService.deleteEntry(id).then(() => {
+        setPersons(
+          persons.filter((person) => {
+            return person.id !== id;
+          })
+        );
+      });
+    }
+  };
+
   return (
     <div>
       <Header text={'Phonebook'} />
@@ -67,7 +81,11 @@ const App = () => {
 
       <Header text={'Numbers'} />
 
-      <Persons persons={persons} filter={filter} />
+      <Persons
+        persons={persons}
+        filter={filter}
+        onDeleteClick={handleDeleteClick}
+      />
     </div>
   );
 };
