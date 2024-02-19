@@ -13,7 +13,7 @@ const Person = ({ name, number }) => {
   );
 };
 
-const People = ({ persons, filter }) => {
+const Persons = ({ persons, filter }) => {
   const listOfPeople = persons.filter((person) => person.name.includes(filter));
   return (
     <div>
@@ -21,6 +21,32 @@ const People = ({ persons, filter }) => {
         <Person key={person.name} name={person.name} number={person.number} />
       ))}
     </div>
+  );
+};
+
+const Filter = ({ filter, onChange }) => {
+  return (
+    <div>
+      Filter shown with
+      <input value={filter} onChange={onChange} />
+    </div>
+  );
+};
+
+const PersonForm = (props) => {
+  return (
+    <form onSubmit={props.onSubmit}>
+      <div>
+        Name: <input value={props.valueName} onChange={props.onChangeName} />
+      </div>
+      <div>
+        Number:{' '}
+        <input value={props.valuePhone} onChange={props.onChangePhone} />
+      </div>
+      <div>
+        <button type='submit'>add</button>
+      </div>
+    </form>
   );
 };
 
@@ -67,25 +93,22 @@ const App = () => {
   return (
     <div>
       <Header text={'Phonebook'} />
-      <div>
-        Filter shown with{' '}
-        <input value={filter} onChange={handleFilterInputChange} />
-      </div>
+
+      <Filter filter={filter} onChange={handleFilterInputChange} />
+
       <Header text={'Add a new person:'} />
-      <form onSubmit={addPerson}>
-        <div>
-          Name: <input value={newName} onChange={handleNameInputChange} />
-        </div>
-        <div>
-          Number:{' '}
-          <input value={newPhoneNumber} onChange={handleNumberInputChange} />
-        </div>
-        <div>
-          <button type='submit'>add</button>
-        </div>
-      </form>
+
+      <PersonForm
+        valueName={newName}
+        valuePhone={newPhoneNumber}
+        onChangeName={handleNameInputChange}
+        onChangePhone={handleNumberInputChange}
+        onSubmit={addPerson}
+      />
+
       <Header text={'Numbers'} />
-      <People persons={persons} filter={filter} />
+
+      <Persons persons={persons} filter={filter} />
     </div>
   );
 };
