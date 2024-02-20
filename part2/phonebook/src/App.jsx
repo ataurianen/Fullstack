@@ -6,12 +6,21 @@ import PersonForm from './components/PersonForm';
 import Header from './components/Header';
 import personService from './services/persons';
 
+const Notification = ({ message, className }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className={className}>{message}</div>;
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState('');
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [filter, setFilter] = useState('');
-  const [notification, setNotification] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [sucessMessage, setSucessMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -41,14 +50,20 @@ const App = () => {
                 person.id !== currentPerson.id ? person : returnedList
               )
             );
-            showNotification(`Updated ${newName}'s phone number`);
+            setSucessMessage(`Updated ${newName}'s phone number`);
+            setTimeout(() => {
+              setSucessMessage(null);
+            }, 5000);
             setNewName('');
             setNewPhoneNumber('');
           })
           .catch(() => {
-            showNotification(
+            setErrorMessage(
               `Information of ${currentPerson.name} has already been removed from server`
             );
+            setTimeout(() => {
+              setErrorMessage(null);
+            }, 5000);
           });
       }
     } else {
@@ -59,18 +74,14 @@ const App = () => {
 
       personService.create(personObject).then((returnedPersons) => {
         setPersons(persons.concat(returnedPersons));
-        showNotification(`Added ${newName}`);
+        setSucessMessage(`Added ${newName}`);
+        setTimeout(() => {
+          setSucessMessage(null);
+        }, 5000);
         setNewName('');
         setNewPhoneNumber('');
       });
     }
-  };
-
-  const showNotification = (message) => {
-    setNotification(message);
-    setTimeout(() => {
-      setNotification(null);
-    }, 5000);
   };
 
   const handleNameInputChange = (e) => {
@@ -99,9 +110,12 @@ const App = () => {
           );
         })
         .catch(() => {
-          showNotification(
+          setErrorMessage(
             `Information of ${person.name} has already been removed from the server`
           );
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 5000);
         });
     }
   };
@@ -109,6 +123,9 @@ const App = () => {
   return (
     <div>
       <Header text={'Phonebook'} />
+
+      <Notification className='error' message={errorMessage} />
+      <Notification className='sucess' message={sucessMessage} />
 
       <Filter filter={filter} onChange={handleFilterInputChange} />
 
