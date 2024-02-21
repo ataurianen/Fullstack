@@ -1,16 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import countriesService from './services/countries';
+import Countries from './Componets/Countries';
 
 function App() {
-  const [country, setCountry] = useState('');
+  const [countries, setCountries] = useState(null);
+  const [filteredCountry, setFilteredCountry] = useState('');
+
+  useEffect(() => {
+    countriesService.getAll().then((countriesList) => {
+      setCountries(countriesList);
+    });
+  }, []);
 
   const handleInputChange = (e) => {
-    setCountry(e.target.value);
+    setFilteredCountry(e.target.value);
   };
 
+  const setFilter = (country) => {
+    setFilteredCountry(country);
+  };
+
+  if (!countries) {
+    return null;
+  }
+
+  const filteredCountryList = countries.filter((country) => {
+    return country.name.common
+      .toLowerCase()
+      .includes(filteredCountry.toLocaleLowerCase());
+  });
+
   return (
-    <>
-      find countries: <input value={country} onChange={handleInputChange} />
-    </>
+    <div>
+      <p>
+        Find countries:{' '}
+        <input value={filteredCountry} onChange={handleInputChange} />
+      </p>
+      <Countries list={filteredCountryList} setFilter={setFilter} />
+    </div>
   );
 }
 
