@@ -6,7 +6,7 @@ const Persons = ({ persons, filter, onDeleteClick }) => {
   const listOfPeople = persons.filter((person) =>
     person.name.toLowerCase().includes(filter.toLowerCase())
   );
-  console.log(listOfPeople);
+
   return (
     <div>
       {listOfPeople.map((person) => (
