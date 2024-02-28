@@ -75,15 +75,21 @@ const App = () => {
         number: newPhoneNumber,
       };
 
-      personService.create(personObject).then((returnedPersons) => {
-        setPersons(persons.concat(returnedPersons));
-        setSucessMessage(`Added ${newName}`);
-        setTimeout(() => {
-          setSucessMessage(null);
-        }, 5000);
-        setNewName('');
-        setNewPhoneNumber('');
-      });
+      personService
+        .create(personObject)
+        .then((returnedPersons) => {
+          setPersons(persons.concat(returnedPersons));
+          setSucessMessage(`Added ${newName}`);
+          setTimeout(() => {
+            setSucessMessage(null);
+          }, 5000);
+          setNewName('');
+          setNewPhoneNumber('');
+        })
+        .catch((error) => {
+          console.log(error.response.data.error);
+          setErrorMessage('Name must be at least 3 characters long');
+        });
     }
   };
 
