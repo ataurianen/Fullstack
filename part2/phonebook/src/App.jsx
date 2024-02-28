@@ -88,7 +88,7 @@ const App = () => {
         })
         .catch((error) => {
           console.log(error.response.data.error);
-          setErrorMessage('Name must be at least 3 characters long');
+          setErrorMessage(error.response.data.error);
         });
     }
   };
