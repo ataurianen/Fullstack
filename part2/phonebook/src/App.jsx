@@ -58,6 +58,7 @@ const App = () => {
             setNewPhoneNumber('');
           })
           .catch(() => {
+            //need to update this to make more sense if new number isnt the correct formatch
             setErrorMessage(
               `Information of ${currentPerson.name} has already been removed from server`
             );
