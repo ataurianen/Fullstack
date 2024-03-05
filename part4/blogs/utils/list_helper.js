@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const dummy = () => {
   return 1;
 };
@@ -13,12 +15,6 @@ const totalLikes = (blogs) => {
 const favoriteBlog = (blogs) => {
   if (blogs.length === 0) {
     return 'List is empty';
-  } else if (blogs.length === 1) {
-    return {
-      title: blogs[0].title,
-      author: blogs[0].author,
-      likes: blogs[0].likes,
-    };
   } else {
     let mostLikedBlog = blogs[0];
     blogs.forEach((blog) => {
@@ -34,8 +30,21 @@ const favoriteBlog = (blogs) => {
   }
 };
 
+const mostBlogs = (blogs) => {
+  if (blogs.length === 0) {
+    return 'List is empty';
+  } else {
+    const result = _.max(Object.entries(_.countBy(blogs, 'author')));
+    return {
+      author: result[0],
+      blogs: result[1],
+    };
+  }
+};
+
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
+  mostBlogs,
 };
