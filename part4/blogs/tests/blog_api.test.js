@@ -36,6 +36,29 @@ describe('when there is initially some blogs saved', () => {
   });
 });
 
+describe('When adding a new blog', () => {
+  test('a vaild blog can be added', async () => {
+    const newBlog = {
+      title: 'test blog',
+      author: 'tester1',
+      url: 'www.testblog.com',
+      likes: 69,
+    };
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
+
+    const titles = blogsAtEnd.map((n) => n.title);
+    assert.strictEqual(titles.at(-1), newBlog.title);
+  });
+});
+
 after(async () => {
   await mongoose.connection.close();
 });
