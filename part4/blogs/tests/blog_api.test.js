@@ -76,6 +76,24 @@ describe('When adding a new blog', () => {
     assert.strictEqual(likes.length, helper.initialBlogs.length + 1);
     assert.strictEqual(likes.at(-1), 0);
   });
+
+  test('if title or url is missing, return 400 bad request', async () => {
+    const newBlogMissingTitle = {
+      author: 'tester1',
+      url: 'www.testblog.com',
+      likes: 69,
+    };
+
+    const newBlogMissingUrl = {
+      title: 'test blog',
+      author: 'tester1',
+      likes: 69,
+    };
+
+    await api.post('/api/blogs').send(newBlogMissingTitle).expect(400);
+
+    await api.post('/api/blogs').send(newBlogMissingUrl).expect(400);
+  });
 });
 
 after(async () => {
