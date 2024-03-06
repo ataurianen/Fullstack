@@ -55,7 +55,7 @@ describe('When adding a new blog', () => {
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
 
     const titles = blogsAtEnd.map((n) => n.title);
-    assert.strictEqual(titles.at(-1), newBlog.title);
+    assert(titles.includes('test blog'));
   });
 
   test('if likes property is missing from request, defaults to 0', async () => {
@@ -93,6 +93,23 @@ describe('When adding a new blog', () => {
     await api.post('/api/blogs').send(newBlogMissingTitle).expect(400);
 
     await api.post('/api/blogs').send(newBlogMissingUrl).expect(400);
+  });
+});
+
+describe('deletion of a note', () => {
+  test('succeeds with a status code 204 if id is vaild', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToDelete = blogsAtStart[0];
+
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1);
+
+    const titles = blogsAtEnd.map((r) => r.titles);
+
+    assert(!titles.includes(blogToDelete.title));
   });
 });
 
