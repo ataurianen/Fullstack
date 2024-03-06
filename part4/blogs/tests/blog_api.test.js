@@ -57,6 +57,25 @@ describe('When adding a new blog', () => {
     const titles = blogsAtEnd.map((n) => n.title);
     assert.strictEqual(titles.at(-1), newBlog.title);
   });
+
+  test('if likes property is missing from request, defaults to 0', async () => {
+    const newBlog = {
+      title: 'test blog',
+      author: 'tester1',
+      url: 'www.testblog.com',
+    };
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    const likes = blogsAtEnd.map((r) => r.likes);
+    assert.strictEqual(likes.length, helper.initialBlogs.length + 1);
+    assert.strictEqual(likes.at(-1), 0);
+  });
 });
 
 after(async () => {
