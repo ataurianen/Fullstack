@@ -1,4 +1,4 @@
-const { test, after, beforeEach } = require('node:test');
+const { test, after, beforeEach, describe } = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
@@ -15,18 +15,25 @@ beforeEach(async () => {
   const promiseArray = blogObjects.map((blog) => blog.save());
   await Promise.all(promiseArray);
 });
+describe('when there is initially some blogs saved', () => {
+  test('blogs are returned as json', async () => {
+    await api
+      .get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+  });
 
-test('blogs are returned as json', async () => {
-  await api
-    .get('/api/blogs')
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-});
+  test('All blogs are returned', async () => {
+    const response = await api.get('/api/blogs');
 
-test('There are 5 blogs', async () => {
-  const response = await api.get('/api/blogs');
+    assert.strictEqual(response.body.length, helper.initialBlogs.length);
+  });
 
-  assert.strictEqual(response.body.length, helper.initialBlogs.length);
+  test('verify unique identifier is id and not _id', async () => {
+    const response = await api.get('/api/blogs');
+    const body = response.body;
+    assert.strictEqual(Object.hasOwn(body[0], 'id'), true);
+  });
 });
 
 after(async () => {
