@@ -2,11 +2,11 @@ const { test, after, beforeEach, describe } = require('node:test');
 const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
-const helper = require('./test_helper');
 const app = require('../app');
-const Blog = require('../models/blog');
-
 const api = supertest(app);
+
+const helper = require('./test_helper');
+const Blog = require('../models/blog');
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -15,7 +15,7 @@ beforeEach(async () => {
   const promiseArray = blogObjects.map((blog) => blog.save());
   await Promise.all(promiseArray);
 });
-describe('when there is initially some blogs saved', () => {
+describe('When there is initially some blogs saved', () => {
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -29,6 +29,12 @@ describe('when there is initially some blogs saved', () => {
     assert.strictEqual(response.body.length, helper.initialBlogs.length);
   });
 
+  test('A specific blog is within the returned blogs', async () => {
+    const response = await api.get('/api/blogs');
+    const titles = response.body.map((r) => r.title);
+    assert(titles.includes('Canonical string reduction'));
+  });
+
   test('verify unique identifier is id and not _id', async () => {
     const response = await api.get('/api/blogs');
     const body = response.body;
@@ -36,8 +42,33 @@ describe('when there is initially some blogs saved', () => {
   });
 });
 
+describe('Viewing a specific blog', () => {
+  test('Succeeds with a valid id', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToView = blogsAtStart[0];
+
+    const resultBlog = await api
+      .get(`/api/blogs/${blogToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    assert.deepStrictEqual(resultBlog.body, blogToView);
+  });
+
+  test('fails with statuscode 404 if blog does not exist', async () => {
+    const validNonexistingId = await helper.nonExistingId();
+    await api.get(`/api/blogs/${validNonexistingId}`).expect(404);
+  });
+
+  test('fails with statuscode 400 id is invalid', async () => {
+    const invalidId = '5a3d5da59070081a82a3445';
+
+    await api.get(`/api/blogs/${invalidId}`).expect(400);
+  });
+});
+
 describe('When adding a new blog', () => {
-  test('a vaild blog can be added', async () => {
+  test('succeeds with vaild data', async () => {
     const newBlog = {
       title: 'test blog',
       author: 'tester1',
@@ -77,7 +108,7 @@ describe('When adding a new blog', () => {
     assert.strictEqual(likes.at(-1), 0);
   });
 
-  test('if title or url is missing, return 400 bad request', async () => {
+  test('fails with status code 400 if data invalid', async () => {
     const newBlogMissingTitle = {
       author: 'tester1',
       url: 'www.testblog.com',
@@ -91,12 +122,15 @@ describe('When adding a new blog', () => {
     };
 
     await api.post('/api/blogs').send(newBlogMissingTitle).expect(400);
-
     await api.post('/api/blogs').send(newBlogMissingUrl).expect(400);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length);
   });
 });
 
-describe('deletion of a note', () => {
+describe('deletion of a blog', () => {
   test('succeeds with a status code 204 if id is vaild', async () => {
     const blogsAtStart = await helper.blogsInDb();
     const blogToDelete = blogsAtStart[0];
@@ -110,6 +144,23 @@ describe('deletion of a note', () => {
     const titles = blogsAtEnd.map((r) => r.titles);
 
     assert(!titles.includes(blogToDelete.title));
+  });
+});
+
+describe('Updating a blog', () => {
+  test('number of likes incrases by 1', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+    const blogToUpdate = blogsAtStart[1];
+    const updatedBlog = {
+      title: 'Go To Statement Considered Harmful',
+      author: 'Edsger W. Dijkstra',
+      url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Consider…',
+      likes: 6,
+    };
+
+    await api.put(`/api/blogs/${blogToUpdate.id}`).send(updatedBlog);
+    const response = await api.get('/api/blogs');
+    assert.strictEqual(response.body[1].likes, blogsAtStart[1].likes + 1);
   });
 });
 
