@@ -3,10 +3,12 @@ const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
 const app = require('../app');
+const bcrypt = require('bcrypt');
 const api = supertest(app);
 
 const helper = require('./test_helper');
 const Blog = require('../models/blog');
+const User = require('../models/user');
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -152,15 +154,47 @@ describe('Updating a blog', () => {
     const blogsAtStart = await helper.blogsInDb();
     const blogToUpdate = blogsAtStart[1];
     const updatedBlog = {
-      title: 'Go To Statement Considered Harmful',
-      author: 'Edsger W. Dijkstra',
-      url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Consider…',
-      likes: 6,
+      title: blogToUpdate.title,
+      author: blogToUpdate.author,
+      url: blogToUpdate.url,
+      likes: blogToUpdate.likes + 1,
     };
-
     await api.put(`/api/blogs/${blogToUpdate.id}`).send(updatedBlog);
     const response = await api.get('/api/blogs');
     assert.strictEqual(response.body[1].likes, blogsAtStart[1].likes + 1);
+  });
+});
+
+describe('When there is initially one user in db', () => {
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    const passwordHash = await bcrypt.hash('sekret', 10);
+    const user = new User({ username: 'root', passwordHash });
+
+    await user.save();
+  });
+
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'mluukkai',
+      name: 'Matti Luukkainen',
+      password: 'salainen',
+    };
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map((u) => u.username);
+    assert(usernames.includes(newUser.username));
   });
 });
 
