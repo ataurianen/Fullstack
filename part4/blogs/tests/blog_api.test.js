@@ -170,14 +170,17 @@ describe('When there is initially one user in db', () => {
     await User.deleteMany({});
 
     const passwordHash = await bcrypt.hash('sekret', 10);
-    const user = new User({ username: 'root', passwordHash });
+    const user = new User({
+      username: 'root',
+      name: 'Superuser',
+      passwordHash,
+    });
 
     await user.save();
   });
 
   test('creation succeeds with a fresh username', async () => {
     const usersAtStart = await helper.usersInDb();
-
     const newUser = {
       username: 'mluukkai',
       name: 'Matti Luukkainen',

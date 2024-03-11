@@ -6,7 +6,7 @@ const info = (...parms) => {
 
 const error = (...parms) => {
   if (process.env.NODE_ENV !== 'test') {
-    error.log(...parms);
+    console.error(...parms);
   }
 };
 
