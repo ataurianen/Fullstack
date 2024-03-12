@@ -199,6 +199,101 @@ describe('When there is initially one user in db', () => {
     const usernames = usersAtEnd.map((u) => u.username);
     assert(usernames.includes(newUser.username));
   });
+
+  test('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'salainen',
+    };
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+    assert(result.body.error.includes('expected `username` to be unique'));
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+  });
+
+  test('creation fails with proper statuscode and message if username is not greater than 3 chars', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'yu',
+      name: 'Jen',
+      password: 'salaissnen',
+    };
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+  });
+
+  test('creation fails with proper statuscode and message if password is not greater than 3 chars', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: 'yuuu',
+      name: 'Jen',
+      password: 'sa',
+    };
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEnd = await helper.usersInDb();
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+  });
+
+  test('creation fails with proper statuscode and message if username or password is missing', async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUserOne = {
+      name: 'Jen',
+      password: 'salaissnen',
+    };
+
+    const newUserTwo = {
+      username: 'Bobby',
+      name: 'Jen',
+    };
+
+    await api
+      .post('/api/users')
+      .send(newUserOne)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEndOne = await helper.usersInDb();
+
+    assert.strictEqual(usersAtEndOne.length, usersAtStart.length);
+
+    await api
+      .post('/api/users')
+      .send(newUserTwo)
+      .expect(400)
+      .expect('Content-Type', /application\/json/);
+
+    const usersAtEndTwo = await helper.usersInDb();
+
+    assert.strictEqual(usersAtEndTwo.length, usersAtStart.length);
+  });
 });
 
 after(async () => {
