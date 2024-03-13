@@ -3,30 +3,43 @@ const assert = require('node:assert');
 const mongoose = require('mongoose');
 const supertest = require('supertest');
 const app = require('../app');
-const bcrypt = require('bcrypt');
 const api = supertest(app);
+const bcrypt = require('bcrypt');
 
 const helper = require('./test_helper');
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
-beforeEach(async () => {
-  await Blog.deleteMany({});
+const testUser = {
+  username: 'testuser',
+  name: 'Test User',
+  password: 'password',
+};
 
-  const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
-  const promiseArray = blogObjects.map((blog) => blog.save());
-  await Promise.all(promiseArray);
-});
+let token;
+
 describe('When there is initially some blogs saved', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+    await User.deleteMany({});
+
+    const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
+
+    const promiseArray = blogObjects.map((blog) => blog.save());
+    await Promise.all(promiseArray);
+
+    await api.post('/api/users').send(testUser);
+
+    const response = await api.post('/api/login').send(testUser);
+
+    token = response.body.token;
+  });
+
   test('blogs are returned as json', async () => {
-    await api
+    const response = await api
       .get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/);
-  });
-
-  test('All blogs are returned', async () => {
-    const response = await api.get('/api/blogs');
 
     assert.strictEqual(response.body.length, helper.initialBlogs.length);
   });
@@ -72,76 +85,134 @@ describe('Viewing a specific blog', () => {
 describe('When adding a new blog', () => {
   test('succeeds with vaild data', async () => {
     const newBlog = {
-      title: 'test blog',
-      author: 'tester1',
-      url: 'www.testblog.com',
+      title: 'New Blog',
+      author: 'New Author',
+      url: 'http://testblog.com',
       likes: 69,
     };
 
-    await api
+    const postResponse = await api
       .post('/api/blogs')
       .send(newBlog)
       .expect(201)
-      .expect('Content-Type', /application\/json/);
+      .expect('Content-Type', /application\/json/)
+      .set('Authorization', `Bearer ${token}`);
+
+    assert.strictEqual(postResponse.body.title, newBlog.title);
+    assert.strictEqual(postResponse.body.author, newBlog.author);
+    assert.strictEqual(postResponse.body.url, newBlog.url);
+    assert.strictEqual(postResponse.body.likes, newBlog.likes);
+
+    await api.get('/api/blogs');
 
     const blogsAtEnd = await helper.blogsInDb();
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1);
 
-    const titles = blogsAtEnd.map((n) => n.title);
-    assert(titles.includes('test blog'));
+    const titles = blogsAtEnd.map((blog) => blog.title);
+
+    assert(titles.includes('New Blog'));
   });
 
   test('if likes property is missing from request, defaults to 0', async () => {
     const newBlog = {
-      title: 'test blog',
-      author: 'tester1',
-      url: 'www.testblog.com',
+      title: 'New Blog',
+      author: 'New Author',
+      url: 'http://testblog.com',
+    };
+
+    const postResponse = await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
+    assert.strictEqual(postResponse.body.likes, 0);
+  });
+
+  test('blog without title is not added', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+
+    const newBlog = {
+      author: 'New Author',
+      url: 'http://example.com/new',
+      likes: 5,
     };
 
     await api
       .post('/api/blogs')
       .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/);
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
 
     const blogsAtEnd = await helper.blogsInDb();
-    const likes = blogsAtEnd.map((r) => r.likes);
-    assert.strictEqual(likes.length, helper.initialBlogs.length + 1);
-    assert.strictEqual(likes.at(-1), 0);
+
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length);
   });
 
-  test('fails with status code 400 if data invalid', async () => {
-    const newBlogMissingTitle = {
-      author: 'tester1',
-      url: 'www.testblog.com',
-      likes: 69,
+  test('a valid blog is not added without a token', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+
+    const newBlog = {
+      title: 'New Blog',
+      author: 'New Author',
+      url: 'http://example.com/new',
+      likes: 5,
     };
 
-    const newBlogMissingUrl = {
-      title: 'test blog',
-      author: 'tester1',
-      likes: 69,
-    };
-
-    await api.post('/api/blogs').send(newBlogMissingTitle).expect(400);
-    await api.post('/api/blogs').send(newBlogMissingUrl).expect(400);
+    await api.post('/api/blogs').send(newBlog).expect(401);
 
     const blogsAtEnd = await helper.blogsInDb();
 
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length);
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length);
+  });
+
+  test('blog without url is not added', async () => {
+    const blogsAtStart = await helper.blogsInDb();
+
+    const newBlog = {
+      title: 'New Blog',
+      author: 'New Author',
+      likes: 5,
+    };
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(400);
+
+    const blogsAtEnd = await helper.blogsInDb();
+    console.log('blogsAtEnd:', blogsAtEnd);
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length);
   });
 });
 
 describe('deletion of a blog', () => {
   test('succeeds with a status code 204 if id is vaild', async () => {
-    const blogsAtStart = await helper.blogsInDb();
-    const blogToDelete = blogsAtStart[0];
+    const blogToDelete = {
+      title: 'New Blog',
+      author: 'New Author',
+      url: 'http://testblog.com',
+      likes: 69,
+    };
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    const response = await api
+      .post('/api/blogs')
+      .send(blogToDelete)
+      .set('Authorization', `Bearer ${token}`);
+
+    const id = response.body.id;
+
+    const blogsAtStart = await helper.blogsInDb();
+
+    await api
+      .delete(`/api/blogs/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204);
 
     const blogsAtEnd = await helper.blogsInDb();
 
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1);
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1);
 
     const titles = blogsAtEnd.map((r) => r.titles);
 
@@ -152,16 +223,25 @@ describe('deletion of a blog', () => {
 describe('Updating a blog', () => {
   test('number of likes incrases by 1', async () => {
     const blogsAtStart = await helper.blogsInDb();
-    const blogToUpdate = blogsAtStart[1];
-    const updatedBlog = {
-      title: blogToUpdate.title,
-      author: blogToUpdate.author,
-      url: blogToUpdate.url,
-      likes: blogToUpdate.likes + 1,
+    const blogToUpdate = blogsAtStart[0];
+
+    const newBlog = {
+      title: 'Updated Blog',
+      author: 'Updated Author',
+      url: 'http://example.com/updated',
+      likes: 10,
     };
-    await api.put(`/api/blogs/${blogToUpdate.id}`).send(updatedBlog);
-    const response = await api.get('/api/blogs');
-    assert.strictEqual(response.body[1].likes, blogsAtStart[1].likes + 1);
+
+    await api.put(`/api/blogs/${blogToUpdate.id}`).send(newBlog).expect(201);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    const updatedBlog = blogsAtEnd.find((blog) => blog.id === blogToUpdate.id);
+
+    assert.strictEqual(updatedBlog.title, newBlog.title);
+    assert.strictEqual(updatedBlog.author, newBlog.author);
+    assert.strictEqual(updatedBlog.url, newBlog.url);
+    assert.strictEqual(updatedBlog.likes, newBlog.likes);
   });
 });
 
