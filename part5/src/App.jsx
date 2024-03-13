@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
+import LoginForm from './components/loginForm';
+import BlogDisplay from './components/Blogs';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -29,41 +31,29 @@ const App = () => {
     }
   };
 
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        Username:
-        <input
-          type='text'
-          value={username}
-          name='Username'
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        Password:
-        <input
-          type='password'
-          value={password}
-          name='password'
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type='submit'>Login</button>
-    </form>
-  );
+  const handleUsernameInputChange = (e) => {
+    setUsername(e.target.value);
+  };
 
-  const blogDisplay = () => (
+  const handlePasswordInputChange = (e) => {
+    setPassword(e.target.value);
+  };
+
+  return (
     <div>
-      <h2>Blogs</h2>
-      <p>{user.name} logged in</p>
-      {blogs.map((blog) => (
-        <Blog key={blog.id} blog={blog} />
-      ))}
+      {user === null ? (
+        <LoginForm
+          valueUsername={username}
+          valuePassword={password}
+          onChangeUsername={handleUsernameInputChange}
+          onChangePassword={handlePasswordInputChange}
+          onSubmit={handleLogin}
+        />
+      ) : (
+        <BlogDisplay user={user} blogs={blogs} />
+      )}
     </div>
   );
-
-  return <div>{user === null ? loginForm() : blogDisplay()}</div>;
 };
 
 export default App;
