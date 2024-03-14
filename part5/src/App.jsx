@@ -3,11 +3,16 @@ import blogService from './services/blogs';
 import loginService from './services/login';
 import LoginForm from './components/loginForm';
 import BlogDisplay from './components/Blogs';
+import NewBlogForm from './components/NewBlogForm';
+import Header from './components/Header';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogAuthor, setBlogAuthor] = useState('');
+  const [blogURL, setBlogURL] = useState('');
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -23,8 +28,8 @@ const App = () => {
     }
   }, []);
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
     try {
       const user = await loginService.login({
@@ -56,6 +61,37 @@ const App = () => {
     blogService.setToken(null);
   };
 
+  const handleBlogTitleInputChange = (e) => {
+    setBlogTitle(e.target.value);
+  };
+
+  const handleBlogAuthorInputChange = (e) => {
+    setBlogAuthor(e.target.value);
+  };
+
+  const handleBlogURLInputChange = (e) => {
+    setBlogURL(e.target.value);
+  };
+
+  const handleNewBlogSubmit = (e) => {
+    e.preventDefault();
+    const blogObject = {
+      title: blogTitle,
+      author: blogAuthor,
+      url: blogURL,
+      user: user,
+    };
+    try {
+      blogService.create(blogObject);
+      setBlogTitle('');
+      setBlogAuthor('');
+      setBlogURL('');
+      blogService.getAll().then((blogs) => setBlogs(blogs));
+    } catch (e) {
+      console.log('Creating a blog didnt work');
+    }
+  };
+
   return (
     <div>
       {user === null ? (
@@ -67,11 +103,28 @@ const App = () => {
           onSubmit={handleLogin}
         />
       ) : (
-        <BlogDisplay
-          user={user}
-          blogs={blogs}
-          onLogoutClick={handleLogoutClick}
-        />
+        <div>
+          <Header text={'Blogs'} />
+          <p>
+            {user.name} logged in{' '}
+            <button onClick={() => onLogoutClick()}>logout</button>
+          </p>
+          <Header text={'Create New'} />
+          <NewBlogForm
+            valueBlogTitle={blogTitle}
+            valueBlogAuthor={blogAuthor}
+            valueBlogURL={blogURL}
+            onChangeBlogTitle={handleBlogTitleInputChange}
+            onChangeBlogAuthor={handleBlogAuthorInputChange}
+            onChangeBlogURL={handleBlogURLInputChange}
+            onSubmit={handleNewBlogSubmit}
+          />
+          <BlogDisplay
+            user={user}
+            blogs={blogs}
+            onLogoutClick={handleLogoutClick}
+          />
+        </div>
       )}
     </div>
   );
