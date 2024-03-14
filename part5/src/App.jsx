@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import LoginForm from './components/loginForm';
@@ -15,6 +14,15 @@ const App = () => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
   }, []);
 
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON);
+      setUser(user);
+      blogService.setToken(user.token);
+    }
+  }, []);
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -23,6 +31,9 @@ const App = () => {
         username,
         password,
       });
+
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
+      blogService.setToken(user.token);
       setUser(user);
       setUsername('');
       setPassword('');
@@ -39,6 +50,12 @@ const App = () => {
     setPassword(e.target.value);
   };
 
+  const handleLogoutClick = (e) => {
+    window.localStorage.removeItem('loggedBlogappUser');
+    setUser(null);
+    blogService.setToken(null);
+  };
+
   return (
     <div>
       {user === null ? (
@@ -50,7 +67,11 @@ const App = () => {
           onSubmit={handleLogin}
         />
       ) : (
-        <BlogDisplay user={user} blogs={blogs} />
+        <BlogDisplay
+          user={user}
+          blogs={blogs}
+          onLogoutClick={handleLogoutClick}
+        />
       )}
     </div>
   );
