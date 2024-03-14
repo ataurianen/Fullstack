@@ -14,6 +14,16 @@ const App = () => {
   const [blogAuthor, setBlogAuthor] = useState('');
   const [blogURL, setBlogURL] = useState('');
   const [user, setUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [sucessMessage, setSucessMessage] = useState(null);
+
+  const Notification = ({ message, className }) => {
+    if (message === null) {
+      return null;
+    }
+
+    return <div className={className}>{message}</div>;
+  };
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -43,7 +53,10 @@ const App = () => {
       setUsername('');
       setPassword('');
     } catch (e) {
-      console.log('Wrong credentials');
+      setErrorMessage(`Wrong username or password`);
+      setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
     }
   };
 
@@ -83,6 +96,10 @@ const App = () => {
     };
     try {
       blogService.create(blogObject);
+      setSucessMessage(`A new blog: ${blogTitle} by ${blogAuthor} added`);
+      setTimeout(() => {
+        setSucessMessage(null);
+      }, 5000);
       setBlogTitle('');
       setBlogAuthor('');
       setBlogURL('');
@@ -95,19 +112,24 @@ const App = () => {
   return (
     <div>
       {user === null ? (
-        <LoginForm
-          valueUsername={username}
-          valuePassword={password}
-          onChangeUsername={handleUsernameInputChange}
-          onChangePassword={handlePasswordInputChange}
-          onSubmit={handleLogin}
-        />
+        <>
+          <Header text={'Log in to application'} />
+          <Notification className='error' message={errorMessage} />
+          <LoginForm
+            valueUsername={username}
+            valuePassword={password}
+            onChangeUsername={handleUsernameInputChange}
+            onChangePassword={handlePasswordInputChange}
+            onSubmit={handleLogin}
+          />
+        </>
       ) : (
         <div>
           <Header text={'Blogs'} />
+          <Notification className='sucess' message={sucessMessage} />
           <p>
             {user.name} logged in{' '}
-            <button onClick={() => onLogoutClick()}>logout</button>
+            <button onClick={handleLogoutClick}>logout</button>
           </p>
           <Header text={'Create New'} />
           <NewBlogForm
@@ -119,11 +141,7 @@ const App = () => {
             onChangeBlogURL={handleBlogURLInputChange}
             onSubmit={handleNewBlogSubmit}
           />
-          <BlogDisplay
-            user={user}
-            blogs={blogs}
-            onLogoutClick={handleLogoutClick}
-          />
+          <BlogDisplay user={user} blogs={blogs} />
         </div>
       )}
     </div>
