@@ -5,6 +5,7 @@ import LoginForm from './components/loginForm';
 import BlogDisplay from './components/Blogs';
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
+import Togglable from './components/Togglable';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
@@ -129,16 +130,19 @@ const App = () => {
             {user.name} logged in{' '}
             <button onClick={handleLogoutClick}>logout</button>
           </p>
-          <Header text={'Create New'} />
-          <NewBlogForm
-            valueBlogTitle={blogTitle}
-            valueBlogAuthor={blogAuthor}
-            valueBlogURL={blogURL}
-            onChangeBlogTitle={handleBlogTitleInputChange}
-            onChangeBlogAuthor={handleBlogAuthorInputChange}
-            onChangeBlogURL={handleBlogURLInputChange}
-            onSubmit={handleNewBlogSubmit}
-          />
+          <Togglable buttonLabel='New Blog'>
+            <Header text={'Create New'} />
+            <NewBlogForm
+              valueBlogTitle={blogTitle}
+              valueBlogAuthor={blogAuthor}
+              valueBlogURL={blogURL}
+              onChangeBlogTitle={handleBlogTitleInputChange}
+              onChangeBlogAuthor={handleBlogAuthorInputChange}
+              onChangeBlogURL={handleBlogURLInputChange}
+              onSubmit={handleNewBlogSubmit}
+            />
+          </Togglable>
+
           <BlogDisplay user={user} blogs={blogs} />
         </div>
       )}
