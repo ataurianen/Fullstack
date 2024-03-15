@@ -86,7 +86,7 @@ const App = () => {
     setBlogURL(e.target.value);
   };
 
-  const handleNewBlogSubmit = (e) => {
+  const handleNewBlogSubmit = async (e) => {
     e.preventDefault();
     const blogObject = {
       title: blogTitle,
@@ -94,19 +94,17 @@ const App = () => {
       url: blogURL,
       user: user,
     };
-    try {
-      blogService.create(blogObject);
-      setSucessMessage(`A new blog: ${blogTitle} by ${blogAuthor} added`);
-      setTimeout(() => {
-        setSucessMessage(null);
-      }, 5000);
-      setBlogTitle('');
-      setBlogAuthor('');
-      setBlogURL('');
-      blogService.getAll().then((blogs) => setBlogs(blogs));
-    } catch (e) {
-      console.log('Creating a blog didnt work');
-    }
+
+    const newBlog = await blogService.create(blogObject);
+    setBlogs(blogs.concat(newBlog));
+    setSucessMessage(`A new blog: ${blogTitle} by ${blogAuthor} added`);
+    setTimeout(() => {
+      setSucessMessage(null);
+    }, 5000);
+
+    setBlogTitle('');
+    setBlogAuthor('');
+    setBlogURL('');
   };
 
   return (
