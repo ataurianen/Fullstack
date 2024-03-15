@@ -11,12 +11,8 @@ const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [blogTitle, setBlogTitle] = useState('');
-  const [blogAuthor, setBlogAuthor] = useState('');
-  const [blogURL, setBlogURL] = useState('');
   const [user, setUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [sucessMessage, setSucessMessage] = useState(null);
 
   const Notification = ({ message, className }) => {
     if (message === null) {
@@ -75,37 +71,9 @@ const App = () => {
     blogService.setToken(null);
   };
 
-  const handleBlogTitleInputChange = (e) => {
-    setBlogTitle(e.target.value);
-  };
-
-  const handleBlogAuthorInputChange = (e) => {
-    setBlogAuthor(e.target.value);
-  };
-
-  const handleBlogURLInputChange = (e) => {
-    setBlogURL(e.target.value);
-  };
-
-  const handleNewBlogSubmit = async (e) => {
-    e.preventDefault();
-    const blogObject = {
-      title: blogTitle,
-      author: blogAuthor,
-      url: blogURL,
-      user: user,
-    };
-
+  const addBlog = async (blogObject) => {
     const newBlog = await blogService.create(blogObject);
     setBlogs(blogs.concat(newBlog));
-    setSucessMessage(`A new blog: ${blogTitle} by ${blogAuthor} added`);
-    setTimeout(() => {
-      setSucessMessage(null);
-    }, 5000);
-
-    setBlogTitle('');
-    setBlogAuthor('');
-    setBlogURL('');
   };
 
   return (
@@ -125,22 +93,12 @@ const App = () => {
       ) : (
         <div>
           <Header text={'Blogs'} />
-          <Notification className='sucess' message={sucessMessage} />
           <p>
             {user.name} logged in{' '}
             <button onClick={handleLogoutClick}>logout</button>
           </p>
           <Togglable buttonLabel='New Blog'>
-            <Header text={'Create New'} />
-            <NewBlogForm
-              valueBlogTitle={blogTitle}
-              valueBlogAuthor={blogAuthor}
-              valueBlogURL={blogURL}
-              onChangeBlogTitle={handleBlogTitleInputChange}
-              onChangeBlogAuthor={handleBlogAuthorInputChange}
-              onChangeBlogURL={handleBlogURLInputChange}
-              onSubmit={handleNewBlogSubmit}
-            />
+            <NewBlogForm createBlog={addBlog} />
           </Togglable>
 
           <BlogDisplay user={user} blogs={blogs} />
