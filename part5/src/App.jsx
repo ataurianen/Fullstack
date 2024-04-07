@@ -71,6 +71,10 @@ const App = () => {
     blogService.setToken(null);
   };
 
+  const handleViewClick = (e) => {
+    console.log('button clicked');
+  };
+
   const addBlog = async (blogObject) => {
     const newBlog = await blogService.create(blogObject);
     setBlogs(blogs.concat(newBlog));
@@ -101,7 +105,7 @@ const App = () => {
             <NewBlogForm createBlog={addBlog} />
           </Togglable>
 
-          <BlogDisplay user={user} blogs={blogs} />
+          <BlogDisplay user={user} blogs={blogs} onClick={handleViewClick} />
         </div>
       )}
     </div>

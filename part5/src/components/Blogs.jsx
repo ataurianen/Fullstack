@@ -1,6 +1,6 @@
 import Blog from './Blog';
 
-const BlogDisplay = ({ user, blogs, onLogoutClick }) => (
+const BlogDisplay = ({ blogs }) => (
   <div>
     {blogs.map((blog) => (
       <Blog key={blog.id} blog={blog} />
