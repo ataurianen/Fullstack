@@ -22,12 +22,14 @@ const create = async (newObject) => {
 };
 
 const updateLikes = async (blog) => {
+  const currentBlog = await axios.get(`${baseUrl}/${blog.id}`);
+
   const updatedBlog = {
-    user: blog.user.id,
-    title: blog.title,
-    author: blog.author,
-    url: blog.url,
-    likes: blog.likes + 1,
+    user: currentBlog.data.user.id,
+    title: currentBlog.data.title,
+    author: currentBlog.data.author,
+    url: currentBlog.data.url,
+    likes: currentBlog.data.likes + 1,
   };
 
   const response = await axios.put(`${baseUrl}/${blog.id}`, updatedBlog);
