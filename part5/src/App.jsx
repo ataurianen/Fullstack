@@ -66,7 +66,7 @@ const App = () => {
   const addBlog = async (blogObject) => {
     blogFormRef.current.toggleVisibility();
     const newBlog = await blogService.create(blogObject);
-    setBlogs(blogs.concat(newBlog));
+    setBlogs(blogs.concat(newBlog).sort((a, b) => b.likes - a.likes));
   };
 
   return (
