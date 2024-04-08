@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import LoginForm from './components/loginForm';
@@ -9,8 +9,6 @@ import Togglable from './components/Togglable';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -35,9 +33,9 @@ const App = () => {
     }
   }, []);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const blogFormRef = useRef();
 
+  const handleLogin = async (username, password) => {
     try {
       const user = await loginService.login({
         username,
@@ -57,25 +55,14 @@ const App = () => {
     }
   };
 
-  const handleUsernameInputChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handlePasswordInputChange = (e) => {
-    setPassword(e.target.value);
-  };
-
   const handleLogoutClick = (e) => {
     window.localStorage.removeItem('loggedBlogappUser');
     setUser(null);
     blogService.setToken(null);
   };
 
-  const handleViewClick = (e) => {
-    console.log('button clicked');
-  };
-
   const addBlog = async (blogObject) => {
+    blogFormRef.current.toggleVisibility();
     const newBlog = await blogService.create(blogObject);
     setBlogs(blogs.concat(newBlog));
   };
@@ -86,26 +73,20 @@ const App = () => {
         <>
           <Header text={'Log in to application'} />
           <Notification className='error' message={errorMessage} />
-          <LoginForm
-            valueUsername={username}
-            valuePassword={password}
-            onChangeUsername={handleUsernameInputChange}
-            onChangePassword={handlePasswordInputChange}
-            onSubmit={handleLogin}
-          />
+          <LoginForm login={handleLogin} />
         </>
       ) : (
         <div>
           <Header text={'Blogs'} />
           <p>
-            {user.name} logged in{' '}
+            {user.name} logged in
             <button onClick={handleLogoutClick}>logout</button>
           </p>
-          <Togglable buttonLabel='New Blog'>
+          <Togglable buttonLabel='New Blog' ref={blogFormRef}>
             <NewBlogForm createBlog={addBlog} />
           </Togglable>
 
-          <BlogDisplay user={user} blogs={blogs} onClick={handleViewClick} />
+          <BlogDisplay user={user} blogs={blogs} />
         </div>
       )}
     </div>

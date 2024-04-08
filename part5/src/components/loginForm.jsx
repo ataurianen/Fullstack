@@ -1,25 +1,45 @@
-const LoginForm = (props) => (
-  <form onSubmit={props.onSubmit}>
-    <div>
-      Username:
-      <input
-        type='text'
-        value={props.valueUsername}
-        name='Username'
-        onChange={props.onChangeUsername}
-      />
-    </div>
-    <div>
-      Password:
-      <input
-        type='password'
-        value={props.valuePassword}
-        name='password'
-        onChange={props.onChangePassword}
-      />
-    </div>
-    <button type='submit'>Login</button>
-  </form>
-);
+import { useState } from 'react';
+
+const LoginForm = ({ login }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleUsernameInputChange = (e) => {
+    setUsername(e.target.value);
+  };
+
+  const handlePasswordInputChange = (e) => {
+    setPassword(e.target.value);
+  };
+
+  const submitLogin = (e) => {
+    e.preventDefault();
+    login(username, password);
+  };
+
+  return (
+    <form onSubmit={submitLogin}>
+      <div>
+        Username:
+        <input
+          type='text'
+          value={username}
+          name='Username'
+          onChange={handleUsernameInputChange}
+        />
+      </div>
+      <div>
+        Password:
+        <input
+          type='password'
+          value={password}
+          name='password'
+          onChange={handlePasswordInputChange}
+        />
+      </div>
+      <button type='submit'>Login</button>
+    </form>
+  );
+};
 
 export default LoginForm;
