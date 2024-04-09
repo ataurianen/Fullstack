@@ -69,6 +69,12 @@ const App = () => {
     setBlogs(blogs.concat(newBlog).sort((a, b) => b.likes - a.likes));
   };
 
+  const handleRemoveClick = (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      blogService.deleteBlog(blog.id);
+      setBlogs(blogs.filter((currentBlog) => currentBlog.id !== blog.id));
+    }
+  };
   return (
     <div>
       {user === null ? (
@@ -88,7 +94,11 @@ const App = () => {
             <NewBlogForm createBlog={addBlog} />
           </Togglable>
 
-          <BlogDisplay user={user} blogs={blogs} />
+          <BlogDisplay
+            user={user}
+            blogs={blogs}
+            removeBlog={handleRemoveClick}
+          />
         </div>
       )}
     </div>
