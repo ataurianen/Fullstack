@@ -3,22 +3,26 @@ import userEvent from '@testing-library/user-event';
 import Blog from './Blog';
 
 describe('<Blog />', () => {
+  const blog = {
+    title: 'Testing 123',
+    author: 'Aubrey Rose',
+    url: 'www.aubrey.com',
+    likes: 23,
+    user: {
+      username: 'aubrey',
+    },
+  };
+  const user = {
+    username: 'aubrey',
+  };
+  const mockHandler = vi.fn();
+
   let container;
 
   beforeEach(() => {
-    const blog = {
-      title: 'Testing 123',
-      author: 'Aubrey Rose',
-      url: 'www.aubrey.com',
-      likes: 23,
-      user: {
-        username: 'aubrey',
-      },
-    };
-    const user = {
-      username: 'aubrey',
-    };
-    container = render(<Blog blog={blog} user={user} />).container;
+    container = render(
+      <Blog blog={blog} user={user} updateLikes={mockHandler} />
+    ).container;
   });
 
   test('renders blogs title and author but not URL or likes by default', () => {
@@ -37,5 +41,14 @@ describe('<Blog />', () => {
 
     const div = container.querySelector('.detailsVisible');
     expect(div).not.toHaveStyle('display: none');
+  });
+
+  test('If like button is clicked twice, the event handler should be called twice', async () => {
+    const user = userEvent.setup();
+    const button = screen.getByText('Like');
+    await user.click(button);
+    await user.click(button);
+
+    expect(mockHandler.mock.calls).toHaveLength(2);
   });
 });
