@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import LoginForm from './components/loginForm';
-import BlogDisplay from './components/Blogs';
+import Blog from './components/Blog';
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
 import Togglable from './components/Togglable';
@@ -47,8 +47,6 @@ const App = () => {
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
       blogService.setToken(user.token);
       setUser(user);
-      setUsername('');
-      setPassword('');
     } catch (e) {
       setErrorMessage('Wrong username or password');
       setTimeout(() => {
@@ -69,12 +67,17 @@ const App = () => {
     setBlogs(blogs.concat(newBlog).sort((a, b) => b.likes - a.likes));
   };
 
+  const updateLikes = async (blogToUpdate) => {
+    await blogService.update(blogToUpdate);
+  };
+
   const handleRemoveClick = (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       blogService.deleteBlog(blog.id);
       setBlogs(blogs.filter((currentBlog) => currentBlog.id !== blog.id));
     }
   };
+
   return (
     <div>
       {user === null ? (
@@ -94,11 +97,17 @@ const App = () => {
             <NewBlogForm createBlog={addBlog} />
           </Togglable>
 
-          <BlogDisplay
-            user={user}
-            blogs={blogs}
-            removeBlog={handleRemoveClick}
-          />
+          {blogs
+            .sort((a, b) => b.likes - a.likes)
+            .map((blog) => (
+              <Blog
+                key={blog.id}
+                user={user}
+                blog={blog}
+                removeBlog={handleRemoveClick}
+                updateLikes={updateLikes}
+              />
+            ))}
         </div>
       )}
     </div>

@@ -33,7 +33,6 @@ describe('<Blog />', () => {
   test('Details are displayed when the show button is clicked', async () => {
     const user = userEvent.setup();
     const button = screen.getByText('View');
-    screen.debug(button);
     await user.click(button);
 
     const div = container.querySelector('.detailsVisible');

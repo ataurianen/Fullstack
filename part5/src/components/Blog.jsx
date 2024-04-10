@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import blogService from '../services/blogs';
 
-const Blog = ({ blog, user, removeBlog }) => {
+const Blog = ({ blog, user, removeBlog, updateLikes }) => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [likes, setLikes] = useState(blog.likes);
 
@@ -19,16 +18,15 @@ const Blog = ({ blog, user, removeBlog }) => {
     display: blog.user.username === user.username ? '' : 'none',
   };
 
-  const handleLikeClick = async () => {
-    console.log(blog.user.username);
-    console.log(user.username);
-    const updatedBlog = {
+  const handleLikeClick = () => {
+    console.log(blog);
+    const blogToUpdate = {
       ...blog,
-      user: blog.user.id,
       likes: likes + 1,
+      user: blog.user.id,
     };
-    const response = await blogService.updateLikes(blog.id, updatedBlog);
-    setLikes(response.likes);
+    updateLikes(blogToUpdate);
+    setLikes(likes + 1);
   };
 
   const handleRemoveClick = () => {
@@ -54,9 +52,7 @@ const Blog = ({ blog, user, removeBlog }) => {
 
       <div className='detailsHidden' style={hideWhenVisible}>
         {blog.title} {blog.author}
-        <button className='view' onClick={() => setDetailsVisible(true)}>
-          View
-        </button>
+        <button onClick={() => setDetailsVisible(true)}>View</button>
       </div>
     </div>
   );
