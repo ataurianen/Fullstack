@@ -12,4 +12,22 @@ const createBlog = async (page, title, author, url) => {
   await page.getByRole('button', { name: 'Create' }).click();
 };
 
-export { loginWith, createBlog };
+const resetDatabase = async (request) => {
+  await request.post('/api/testing/reset');
+  await request.post('/api/users', {
+    data: {
+      name: 'Matti Luukkainen',
+      username: 'mluukkai',
+      password: 'salainen',
+    },
+  });
+  await request.post('/api/users', {
+    data: {
+      name: 'Ted Tester',
+      username: 'ted',
+      password: 'tedsecret',
+    },
+  });
+};
+
+export { loginWith, createBlog, resetDatabase };

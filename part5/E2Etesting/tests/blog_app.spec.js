@@ -1,18 +1,10 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test');
-const { loginWith, createBlog } = require('./helper');
+const { loginWith, createBlog, resetDatabase } = require('./helper');
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
-    await request.post('http:localhost:3003/api/testing/reset');
-    await request.post('http://localhost:3003/api/users', {
-      data: {
-        name: 'Matti Luukkainen',
-        username: 'mluukkai',
-        password: 'salainen',
-      },
-    });
-
-    await page.goto('http://localhost:5173');
+    await resetDatabase(request);
+    await page.goto('');
   });
 
   test('Login form is shown', async ({ page }) => {
@@ -53,12 +45,29 @@ describe('Blog app', () => {
       ).toBeVisible();
     });
 
-    test('clicking the like button increases likes by 1', async ({ page }) => {
-      await createBlog(page, 'Test Blog', 'Matti Luukkainen', 'www.test.com');
+    describe('and a blog exisits', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'Test Blog', 'Matti Luukkainen', 'www.test.com');
+      });
+      test('clicking the like button increases likes by 1', async ({
+        page,
+      }) => {
+        await page.getByRole('button', { name: 'View' }).click();
+        await page.getByRole('button', { name: 'Like' }).click();
+        await expect(page.getByText('likes 1 Like')).toBeVisible();
+      });
 
-      await page.getByRole('button', { name: 'View' }).click();
-      await page.getByRole('button', { name: 'Like' }).click();
-      await expect(page.getByText('likes 1 Like')).toBeVisible();
+      test('blog can be deleted by creator', async ({ page }) => {
+        await page.getByRole('button', { name: 'View' }).click();
+        page.on('dialog', async (dialog) => {
+          await dialog.accept();
+        });
+        await page.getByRole('button', { name: 'Remove' });
+
+        await expect(
+          page.getByText('Test blog Matti Luukkainen View')
+        ).not.toBeVisible();
+      });
     });
   });
 });
