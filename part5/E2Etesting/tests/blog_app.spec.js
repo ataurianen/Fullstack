@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test');
-const { loginWith } = require('./helper');
+const { loginWith, createBlog } = require('./helper');
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -28,11 +28,15 @@ describe('Blog app', () => {
     });
 
     test('fails with wrong credentials', async ({ page }) => {
-      await page.getByTestId('username').fill('mluukkai');
-      await page.getByTestId('password').fill('bobs');
-      await page.getByRole('button', { name: 'Login' }).click();
+      await loginWith(page, 'mluukkai', 'bobs');
 
-      await expect(page.getByText('Wrong username or password')).toBeVisible();
+      const errorDiv = await page.locator('.error');
+      await expect(errorDiv).toContainText('Wrong username or password');
+      await expect(errorDiv).toHaveCSS('border-style', 'solid');
+      await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)');
+      await expect(
+        page.getByText('Matti Luukkainen logged in')
+      ).not.toBeVisible();
     });
   });
 
@@ -42,15 +46,19 @@ describe('Blog app', () => {
     });
 
     test('a new blog can be created', async ({ page }) => {
-      await page.getByRole('button', { name: 'New Blog' }).click();
-      await page.getByTestId('Title').fill('Test Blog');
-      await page.getByTestId('Author').fill('Matti Luukkainen');
-      await page.getByTestId('URL').fill('www.test.com');
-      await page.getByRole('button', { name: 'Create' }).click();
+      await createBlog(page, 'Test Blog', 'Matti Luukkainen', 'www.test.com');
 
       await expect(
         page.getByText('Test Blog Matti Luukkainen View')
       ).toBeVisible();
+    });
+
+    test('clicking the like button increases likes by 1', async ({ page }) => {
+      await createBlog(page, 'Test Blog', 'Matti Luukkainen', 'www.test.com');
+
+      await page.getByRole('button', { name: 'View' }).click();
+      await page.getByRole('button', { name: 'Like' }).click();
+      await expect(page.getByText('likes 1 Like')).toBeVisible();
     });
   });
 });
