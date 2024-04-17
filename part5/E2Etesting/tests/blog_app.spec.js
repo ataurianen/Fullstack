@@ -15,6 +15,25 @@ describe('Blog app', () => {
   });
 
   test('Login form is shown', async ({ page }) => {
-    await page.getByRole('button', { name: 'Login' }).click();
+    await expect(page.getByText('Username')).toBeVisible();
+    await expect(page.getByText('Password')).toBeVisible();
+  });
+
+  describe('Login', () => {
+    test('succeeds with correct credentials', async ({ page }) => {
+      await page.getByTestId('username').fill('mluukkai');
+      await page.getByTestId('password').fill('salainen');
+      await page.getByRole('button', { name: 'Login' }).click();
+
+      await expect(page.getByText('Matti Luukkainen logged in')).toBeVisible();
+    });
+
+    test('fails with wrong credentials', async ({ page }) => {
+      await page.getByTestId('username').fill('mluukkai');
+      await page.getByTestId('password').fill('bobs');
+      await page.getByRole('button', { name: 'Login' }).click();
+
+      await expect(page.getByText('Wrong username or password')).toBeVisible();
+    });
   });
 });
