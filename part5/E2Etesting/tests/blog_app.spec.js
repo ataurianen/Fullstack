@@ -68,6 +68,16 @@ describe('Blog app', () => {
           page.getByText('Test blog Matti Luukkainen View')
         ).not.toBeVisible();
       });
+
+      test('other users cannot see the Remove button', async ({ page }) => {
+        await page.getByRole('button', { name: 'logout' }).click();
+        await loginWith(page, 'bob', 'password');
+
+        await page.getByRole('button', { name: 'View' }).click();
+        await expect(
+          page.getByRole('button', { name: 'Remove' })
+        ).not.toBeVisible();
+      });
     });
   });
 });

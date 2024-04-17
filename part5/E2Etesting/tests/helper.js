@@ -23,9 +23,9 @@ const resetDatabase = async (request) => {
   });
   await request.post('/api/users', {
     data: {
-      name: 'Ted Tester',
-      username: 'ted',
-      password: 'tedsecret',
+      name: 'Bob Steve',
+      username: 'bob',
+      password: 'password',
     },
   });
 };
