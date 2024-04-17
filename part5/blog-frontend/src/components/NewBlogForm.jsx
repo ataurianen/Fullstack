@@ -26,21 +26,21 @@ const NewBlogForm = ({ createBlog }) => {
       <form onSubmit={addBlog}>
         Title:
         <input
-          className='title'
+          data-testid='Title'
           value={blogTitle}
           onChange={(e) => setBlogTitle(e.target.value)}
         />
         <br />
         Author:
         <input
-          className='author'
+          data-testid='Author'
           value={blogAuthor}
           onChange={(e) => setBlogAuthor(e.target.value)}
         />
         <br />
         URL:
         <input
-          className='url'
+          data-testid='URL'
           value={blogURL}
           onChange={(e) => setBlogURL(e.target.value)}
         />

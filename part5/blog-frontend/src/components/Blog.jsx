@@ -51,7 +51,7 @@ const Blog = ({ blog, user, removeBlog, updateLikes }) => {
       </div>
 
       <div className='detailsHidden' style={hideWhenVisible}>
-        {blog.title} {blog.author}
+        {blog.title} {blog.author}{' '}
         <button onClick={() => setDetailsVisible(true)}>View</button>
       </div>
     </div>
