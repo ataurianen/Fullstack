@@ -10,6 +10,7 @@ const createBlog = async (page, title, author, url) => {
   await page.getByTestId('Author').fill(author);
   await page.getByTestId('URL').fill(url);
   await page.getByRole('button', { name: 'Create' }).click();
+  await page.getByText(`${title} ${author} View`).waitFor();
 };
 
 const resetDatabase = async (request) => {
@@ -30,4 +31,11 @@ const resetDatabase = async (request) => {
   });
 };
 
-export { loginWith, createBlog, resetDatabase };
+const clickLike = async (page, button, number) => {
+  for (let i = 0; i < number; i++) {
+    await button.click();
+    await page.getByText(`likes ${i + 1}`).waitFor();
+  }
+};
+
+export { loginWith, createBlog, resetDatabase, clickLike };

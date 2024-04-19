@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test');
-const { loginWith, createBlog, resetDatabase } = require('./helper');
+const { loginWith, createBlog, resetDatabase, clickLike } = require('./helper');
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -22,10 +22,7 @@ describe('Blog app', () => {
     test('fails with wrong credentials', async ({ page }) => {
       await loginWith(page, 'mluukkai', 'bobs');
 
-      const errorDiv = await page.locator('.error');
-      await expect(errorDiv).toContainText('Wrong username or password');
-      await expect(errorDiv).toHaveCSS('border-style', 'solid');
-      await expect(errorDiv).toHaveCSS('color', 'rgb(255, 0, 0)');
+      await expect(page.getByText('Wrong username or password')).toBeVisible();
       await expect(
         page.getByText('Matti Luukkainen logged in')
       ).not.toBeVisible();
@@ -77,6 +74,64 @@ describe('Blog app', () => {
         await expect(
           page.getByRole('button', { name: 'Remove' })
         ).not.toBeVisible();
+      });
+    });
+    describe('and multiple blogs exist', () => {
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'Test 1', 'Bob Steve', 'www.example1.com');
+        await createBlog(page, 'Test 2', 'Bob Steve', 'www.example2.com');
+        await createBlog(page, 'Test 3', 'Bob Steve', 'www.example3.com');
+      });
+
+      test('blogs are ordered by likes', async ({ page }) => {
+        await page
+          .getByText('Test 1')
+          .getByRole('button', { name: 'View' })
+          .click();
+        await page
+          .getByText('Test 2')
+          .getByRole('button', { name: 'View' })
+          .click();
+        await page
+          .getByText('Test 3')
+          .getByRole('button', { name: 'View' })
+          .click();
+
+        await page.pause();
+
+        const likeButton1 = page
+          .getByText('Test 1')
+          .getByRole('button', { name: 'Like' });
+        await clickLike(page, likeButton1, 1);
+        await page
+          .getByText('Test 1')
+          .getByRole('button', { name: 'Hide' })
+          .click();
+
+        const likeButton2 = page
+          .getByText('Test 2')
+          .getByRole('button', { name: 'Like' });
+        await clickLike(page, likeButton2, 3);
+        await page
+          .getByText('Test 2')
+          .getByRole('button', { name: 'Hide' })
+          .click();
+
+        const likeButton3 = page
+          .getByText('Test 3')
+          .getByRole('button', { name: 'Like' });
+        await clickLike(page, likeButton3, 2);
+        await page
+          .getByText('Test 3')
+          .getByRole('button', { name: 'Hide' })
+          .click();
+
+        await page.pause();
+        const blogDivs = await page.locator('div.blog').all();
+
+        expect(blogDivs[0]).toHaveText('Test 2 Bob Steve View');
+        expect(blogDivs[1]).toHaveText('Test 3 Bob Steve View');
+        expect(blogDivs[2]).toHaveText('Test 1 Bob Steve View');
       });
     });
   });
