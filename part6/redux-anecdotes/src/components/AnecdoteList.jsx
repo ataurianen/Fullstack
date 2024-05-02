@@ -18,9 +18,11 @@ const Anecdote = ({ anecdote, handleClick }) => {
 const Anecdotes = () => {
   const dispatch = useDispatch();
   const anecdotes = useSelector(({ anecdotes, filter }) => {
-    return anecdotes.filter((anecdote) =>
-      anecdote.content.toLowerCase().includes(filter.toLowerCase())
-    );
+    return anecdotes.filter((anecdote) => {
+      if (anecdote.content) {
+        return anecdote.content.toLowerCase().includes(filter);
+      }
+    });
   });
 
   const handleVote = (anecdote) => {
