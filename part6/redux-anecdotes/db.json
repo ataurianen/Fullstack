@@ -59,6 +59,11 @@
       "id": "2c57",
       "content": "This is a test",
       "votes": 0
+    },
+    {
+      "id": "bed2",
+      "content": "bob test",
+      "votes": 0
     }
   ]
 }
