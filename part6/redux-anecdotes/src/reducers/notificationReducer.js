@@ -14,13 +14,13 @@ const notificationSlice = createSlice({
   },
 });
 
-export const setNotification = (message) => {
+export const setNotification = (message, time) => {
   return async (dispatch) => {
     dispatch(displayNotification(message));
 
     setTimeout(() => {
       dispatch(hideNotification());
-    }, 5000);
+    }, time * 1000);
   };
 };
 
