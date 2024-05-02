@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { vote } from '../reducers/anecdoteReducer';
+import { addVote } from '../reducers/anecdoteReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNotification } from '../reducers/notificationReducer';
 
@@ -26,7 +26,7 @@ const Anecdotes = () => {
   });
 
   const handleVote = (anecdote) => {
-    dispatch(vote(anecdote.id));
+    dispatch(addVote(anecdote));
     dispatch(setNotification(`You voted for: ${anecdote.content}`));
   };
 
