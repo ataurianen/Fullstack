@@ -12,6 +12,7 @@ const App = () => {
     queryKey: ['anecdotes'],
     queryFn: getAnecdotes,
     retry: 1,
+    refetchOnWindowFocus: false,
   });
   console.log(JSON.parse(JSON.stringify(result)));
 
@@ -24,6 +25,7 @@ const App = () => {
   }
 
   const anecdotes = result.data;
+
   return (
     <div>
       <h3>Anecdote app</h3>
