@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
 import { Routes, Route, Link, useMatch, useNavigate } from 'react-router-dom';
+import { useField } from './hooks';
 
 const Menu = ({ notification }) => {
   const padding = {
@@ -30,11 +31,12 @@ const Anecdote = ({ anecdote }) => {
   return (
     <div>
       <h2>
-        {anecdote.content} by {anecdote.author}
+        {anecdote.content.value} by {anecdote.author.value}
       </h2>
       <p>has {anecdote.votes} votes</p>
       <p>
-        for more info see <a href={anecdote.info}>{anecdote.info}</a>
+        for more info see{' '}
+        <a href={anecdote.info.value}>{anecdote.info.value}</a>
       </p>
     </div>
   );
@@ -87,18 +89,18 @@ const Footer = () => (
 );
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState('');
-  const [author, setAuthor] = useState('');
-  const [info, setInfo] = useState('');
+  const content = useField('content');
+  const author = useField('author');
+  const info = useField('info');
 
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     props.addNew({
-      content,
-      author,
-      info,
+      content: content.value,
+      author: author.value,
+      info: info.value,
       votes: 0,
     });
     navigate('/');
@@ -110,27 +112,15 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input
-            name='content'
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
+          <input {...content} />
         </div>
         <div>
           author
-          <input
-            name='author'
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
+          <input {...author} />
         </div>
         <div>
           url for more info
-          <input
-            name='info'
-            value={info}
-            onChange={(e) => setInfo(e.target.value)}
-          />
+          <input {...info} />
         </div>
         <button>create</button>
       </form>
