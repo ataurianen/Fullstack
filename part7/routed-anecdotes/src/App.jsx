@@ -93,6 +93,13 @@ const CreateNew = (props) => {
   const author = useField('author');
   const info = useField('info');
 
+  const handleReset = (e) => {
+    e.preventDefault();
+    content.reset();
+    author.reset();
+    info.reset();
+  };
+
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -123,6 +130,7 @@ const CreateNew = (props) => {
           <input {...info} />
         </div>
         <button>create</button>
+        <button onClick={handleReset}>reset</button>
       </form>
     </div>
   );
