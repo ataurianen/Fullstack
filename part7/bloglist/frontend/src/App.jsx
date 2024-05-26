@@ -1,5 +1,6 @@
 import { useState, useEffect, createRef } from 'react';
-
+import { useDispatch } from 'react-redux';
+import { setNotification } from './reducers/notificationReducer';
 import blogService from './services/blogs';
 import loginService from './services/login';
 import storage from './services/storage';
@@ -12,7 +13,8 @@ import Togglable from './components/Togglable';
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
-  const [notification, setNotification] = useState(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -27,28 +29,26 @@ const App = () => {
 
   const blogFormRef = createRef();
 
-  const notify = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 5000);
-  };
-
   const handleLogin = async (credentials) => {
     try {
       const user = await loginService.login(credentials);
       setUser(user);
       storage.saveUser(user);
-      notify(`Welcome back, ${user.name}`);
+      dispatch(setNotification(`Welcome back, ${user.name}`, 'success'));
     } catch (error) {
-      notify('Wrong credentials', 'error');
+      dispatch(setNotification('Wrong credentials', 'error'));
     }
   };
 
   const handleCreate = async (blog) => {
     const newBlog = await blogService.create(blog);
     setBlogs(blogs.concat(newBlog));
-    notify(`Blog created: ${newBlog.title}, ${newBlog.author}`);
+    dispatch(
+      setNotification(
+        `Blog created: ${newBlog.title}, ${newBlog.author}`,
+        'success'
+      )
+    );
     blogFormRef.current.toggleVisibility();
   };
 
@@ -59,21 +59,31 @@ const App = () => {
       likes: blog.likes + 1,
     });
 
-    notify(`You liked ${updatedBlog.title} by ${updatedBlog.author}`);
+    dispatch(
+      setNotification(
+        `You liked ${updatedBlog.title} by ${updatedBlog.author}`,
+        'success'
+      )
+    );
     setBlogs(blogs.map((b) => (b.id === blog.id ? updatedBlog : b)));
   };
 
   const handleLogout = () => {
     setUser(null);
     storage.removeUser();
-    notify(`Bye, ${user.name}!`);
+    dispatch(setNotification(`Bye, ${user.name}!`, 'success'));
   };
 
   const handleDelete = async (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       await blogService.remove(blog.id);
       setBlogs(blogs.filter((b) => b.id !== blog.id));
-      notify(`Blog ${blog.title}, by ${blog.author} removed`);
+      dispatch(
+        setNotification(
+          `Blog ${blog.title}, by ${blog.author} removed`,
+          'success'
+        )
+      );
     }
   };
 
@@ -81,7 +91,7 @@ const App = () => {
     return (
       <div>
         <h2>blogs</h2>
-        <Notification notification={notification} />
+        <Notification />
         <Login doLogin={handleLogin} />
       </div>
     );
@@ -92,7 +102,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification notification={notification} />
+      <Notification />
       <div>
         {user.name} logged in
         <button onClick={handleLogout}>logout</button>
