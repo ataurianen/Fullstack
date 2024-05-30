@@ -100,21 +100,31 @@ let books = [
 const typeDefs = `
 
   type Book {
-      title: String!
-      author: String!
-      published: Int
-      genres: [String]
+    title: String!
+    author: String!
+    published: Int!
+    genres: [String]!
   }
   type Query {
-      bookCount: Int!
-      authorCount: Int!
-      allBooks(author: String, genre: String): [Book]!
-      allAuthors: [Author!]!
+    bookCount: Int!
+    authorCount: Int!
+    allBooks(author: String, genre: String): [Book]!
+    allAuthors: [Author!]!
   }
 
   type Author {
-      name: String!
-      authorBookCount: Int!
+    name: String!
+    born: Int
+    authorBookCount: Int!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String]!
+    ): Book
   }
 `;
 
@@ -149,6 +159,18 @@ const resolvers = {
     authorBookCount: (root) => {
       const counter = books.filter((book) => book.author === root.name);
       return counter.length;
+    },
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      if (!authors.find((author) => author.name === args.author)) {
+        const newAuthor = { name: args.author };
+        authors = authors.concat(newAuthor);
+      }
+
+      const book = { ...args };
+      books = books.concat(book);
+      return book;
     },
   },
 };
