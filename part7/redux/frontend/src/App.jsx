@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import blogService from './services/blogs';
 import loginService from './services/login';
 import storage from './services/storage';
 import LoginForm from './components/loginForm';
@@ -7,7 +6,12 @@ import Blog from './components/Blog';
 import Notification from './components/Notification';
 import { setNotification } from './reducers/notificationReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import { createBlog, initializeBlogs } from './reducers/blogReducer';
+import {
+  createBlog,
+  initializeBlogs,
+  deleteBlog,
+  likeBlog,
+} from './reducers/blogReducer';
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
 import Togglable from './components/Togglable';
@@ -66,20 +70,13 @@ const App = () => {
   };
 
   const updateLikes = async (blogToUpdate) => {
-    const updatedBlog = await blogService.update(blogToUpdate.id, {
-      ...blogToUpdate,
-      likes: blogToUpdate.likes + 1,
-    });
-    notify(`You liked ${updatedBlog.title} by ${updatedBlog.author}`);
-    setBlogs(
-      blogs.map((blog) => (blog.id === blogToUpdate.id ? updatedBlog : blog))
-    );
+    dispatch(likeBlog(blogToUpdate));
+    notify(`You liked ${blogToUpdate.title} by ${blogToUpdate.author}`);
   };
 
   const handleRemoveClick = async (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      await blogService.deleteBlog(blog.id);
-      setBlogs(blogs.filter((currentBlog) => currentBlog.id !== blog.id));
+      dispatch(deleteBlog(blog.id));
     }
   };
 
