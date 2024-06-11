@@ -6,20 +6,26 @@ import LoginForm from './components/loginForm';
 import Blog from './components/Blog';
 import Notification from './components/Notification';
 import { setNotification } from './reducers/notificationReducer';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { createBlog, initializeBlogs } from './reducers/blogReducer';
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
 import Togglable from './components/Togglable';
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs));
-  }, []);
+    dispatch(initializeBlogs());
+  }, [dispatch]);
+
+  const blogs = useSelector((state) => {
+    console.log('state.blogs:', state.blogs);
+    const currentBlogs = state.blogs;
+    return currentBlogs;
+  });
 
   useEffect(() => {
     const user = storage.loadUser();
@@ -54,9 +60,8 @@ const App = () => {
   };
 
   const addBlog = async (blog) => {
-    const newBlog = await blogService.create(blog);
-    setBlogs(blogs.concat(newBlog));
-    notify(`Blog created: ${newBlog.title} ${newBlog.author}`);
+    dispatch(createBlog(blog, user));
+    notify(`Blog created: ${blog.title} ${blog.author}`);
     blogFormRef.current.toggleVisibility();
   };
 
@@ -101,7 +106,7 @@ const App = () => {
       </Togglable>
 
       {blogs
-        .sort((a, b) => b.likes - a.likes)
+        .toSorted((a, b) => b.likes - a.likes)
         .map((blog) => (
           <Blog
             key={blog.id}

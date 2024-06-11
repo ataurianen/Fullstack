@@ -12,7 +12,7 @@ const getAll = async () => {
   return response.data;
 };
 
-const create = async (newObject) => {
+const createNew = async (newObject) => {
   const response = await axios.post(baseUrl, newObject, getConfig());
   return response.data;
 };
@@ -30,4 +30,4 @@ const deleteBlog = async (id) => {
   await axios.delete(`${baseUrl}/${id}`, getConfig());
 };
 
-export default { getAll, create, update, deleteBlog };
+export default { getAll, createNew, update, deleteBlog };
