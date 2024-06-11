@@ -5,6 +5,8 @@ import storage from './services/storage';
 import LoginForm from './components/loginForm';
 import Blog from './components/Blog';
 import Notification from './components/Notification';
+import { setNotification } from './reducers/notificationReducer';
+import { useDispatch } from 'react-redux';
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
 import Togglable from './components/Togglable';
@@ -12,7 +14,8 @@ import Togglable from './components/Togglable';
 const App = () => {
   const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -28,10 +31,7 @@ const App = () => {
   const blogFormRef = useRef();
 
   const notify = (message, type = 'success') => {
-    setErrorMessage({ message, type });
-    setTimeout(() => {
-      setErrorMessage(null);
-    }, 5000);
+    dispatch(setNotification({ message, type, time: 5 }));
   };
 
   const handleLogin = async (username, password) => {
@@ -42,6 +42,7 @@ const App = () => {
       });
       setUser(user);
       storage.saveUser(user);
+      notify(`Welcome back, ${user.name}`);
     } catch (e) {
       notify('Wrong username or password', 'error');
     }
@@ -64,6 +65,7 @@ const App = () => {
       ...blogToUpdate,
       likes: blogToUpdate.likes + 1,
     });
+    notify(`You liked ${updatedBlog.title} by ${updatedBlog.author}`);
     setBlogs(
       blogs.map((blog) => (blog.id === blogToUpdate.id ? updatedBlog : blog))
     );
@@ -80,7 +82,7 @@ const App = () => {
     return (
       <div>
         <Header text={'Log in to application'} />
-        <Notification notification={errorMessage} />
+        <Notification />
         <LoginForm login={handleLogin} />
       </div>
     );
@@ -89,7 +91,7 @@ const App = () => {
   return (
     <div>
       <Header text={'Blogs'} />
-      <Notification notification={errorMessage} />
+      <Notification />
       <div>
         {user.name} logged in
         <button onClick={handleLogoutClick}>logout</button>
