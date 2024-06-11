@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import loginService from './services/login';
-import storage from './services/storage';
-import LoginForm from './components/loginForm';
+import { useEffect, useRef } from 'react';
+import LoginForm from './components/LoginForm';
 import Blog from './components/Blog';
 import Notification from './components/Notification';
 import { setNotification } from './reducers/notificationReducer';
@@ -15,10 +13,9 @@ import {
 import NewBlogForm from './components/NewBlogForm';
 import Header from './components/Header';
 import Togglable from './components/Togglable';
+import { loadUser, logout, userLogIn } from './reducers/userReducer';
 
 const App = () => {
-  const [user, setUser] = useState(null);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -26,16 +23,14 @@ const App = () => {
   }, [dispatch]);
 
   const blogs = useSelector((state) => {
-    console.log('state.blogs:', state.blogs);
     const currentBlogs = state.blogs;
     return currentBlogs;
   });
 
+  const loggedInUser = useSelector(({ user }) => user);
+
   useEffect(() => {
-    const user = storage.loadUser();
-    if (user) {
-      setUser(user);
-    }
+    dispatch(loadUser());
   }, []);
 
   const blogFormRef = useRef();
@@ -46,25 +41,19 @@ const App = () => {
 
   const handleLogin = async (username, password) => {
     try {
-      const user = await loginService.login({
-        username,
-        password,
-      });
-      setUser(user);
-      storage.saveUser(user);
-      notify(`Welcome back, ${user.name}`);
+      dispatch(userLogIn({ username, password }));
+      notify(`Welcome back, ${username}`);
     } catch (e) {
       notify('Wrong username or password', 'error');
     }
   };
 
   const handleLogoutClick = () => {
-    setUser(null);
-    storage.removeUser();
+    dispatch(logout());
   };
 
   const addBlog = async (blog) => {
-    dispatch(createBlog(blog, user));
+    dispatch(createBlog(blog, loggedInUser));
     notify(`Blog created: ${blog.title} ${blog.author}`);
     blogFormRef.current.toggleVisibility();
   };
@@ -80,7 +69,7 @@ const App = () => {
     }
   };
 
-  if (!user) {
+  if (!loggedInUser) {
     return (
       <div>
         <Header text={'Log in to application'} />
@@ -95,7 +84,7 @@ const App = () => {
       <Header text={'Blogs'} />
       <Notification />
       <div>
-        {user.name} logged in
+        {loggedInUser.name} logged in
         <button onClick={handleLogoutClick}>logout</button>
       </div>
       <Togglable buttonLabel='New Blog' ref={blogFormRef}>
