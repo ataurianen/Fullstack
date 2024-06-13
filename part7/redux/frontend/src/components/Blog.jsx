@@ -1,40 +1,51 @@
-import { useState } from 'react';
 import storage from '../services/storage';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { deleteBlog, likeBlog } from '../reducers/blogReducer';
 
-const Blog = ({ blog, removeBlog, updateLikes }) => {
-  const [detailsVisible, setDetailsVisible] = useState(false);
+const Blog = ({ blogs, notify }) => {
+  const id = useParams().id;
+  const blog = blogs.find((b) => b.id === id);
 
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const updateLikes = async () => {
+    dispatch(likeBlog(blog));
+    notify(`You liked ${blog.title} by ${blog.author}`);
   };
+
+  const handleRemoveClick = async () => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      dispatch(deleteBlog(id));
+      navigate('/');
+    }
+  };
+  if (!blog) {
+    return null;
+  }
 
   const showRemoveButton = {
     display: blog.user.username === storage.me() ? '' : 'none',
   };
 
   return (
-    <div style={blogStyle} className='blog'>
-      {blog.title} {blog.author}{' '}
-      <button onClick={() => setDetailsVisible(!detailsVisible)}>
-        {detailsVisible ? 'Hide' : 'View'}
+    <div>
+      <h1>
+        {blog.title} {blog.author}
+      </h1>
+
+      <div>
+        <a href={blog.url}>{blog.url}</a>
+      </div>
+      <div>
+        likes {blog.likes} <button onClick={() => updateLikes()}>Like</button>
+      </div>
+      <div>{blog.user.name}</div>
+      <button style={showRemoveButton} onClick={() => handleRemoveClick()}>
+        Remove
       </button>
-      {detailsVisible && (
-        <div>
-          <div>{blog.url}</div>
-          <div>
-            likes {blog.likes}{' '}
-            <button onClick={() => updateLikes(blog)}>Like</button>
-          </div>
-          <div>{blog.user.name}</div>
-          <button style={showRemoveButton} onClick={() => removeBlog(blog)}>
-            Remove
-          </button>
-        </div>
-      )}
+      <div>{`added by ${blog.user.name}`}</div>
     </div>
   );
 };

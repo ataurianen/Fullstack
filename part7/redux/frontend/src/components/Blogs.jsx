@@ -1,9 +1,9 @@
 import Togglable from './Togglable';
-import Blog from './Blog';
 import NewBlogForm from './NewBlogForm';
 import { useRef } from 'react';
-import { createBlog, deleteBlog, likeBlog } from '../reducers/blogReducer';
+import { createBlog } from '../reducers/blogReducer';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const Blogs = ({ blogs, notify, loggedInUser }) => {
   const dispatch = useDispatch();
@@ -16,15 +16,12 @@ const Blogs = ({ blogs, notify, loggedInUser }) => {
     blogFormRef.current.toggleVisibility();
   };
 
-  const updateLikes = async (blogToUpdate) => {
-    dispatch(likeBlog(blogToUpdate));
-    notify(`You liked ${blogToUpdate.title} by ${blogToUpdate.author}`);
-  };
-
-  const handleRemoveClick = async (blog) => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      dispatch(deleteBlog(blog.id));
-    }
+  const blogStyle = {
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5,
   };
 
   return (
@@ -36,12 +33,11 @@ const Blogs = ({ blogs, notify, loggedInUser }) => {
       {blogs
         .toSorted((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            removeBlog={handleRemoveClick}
-            updateLikes={updateLikes}
-          />
+          <div style={blogStyle}>
+            <Link to={`/${blog.id}`}>
+              {blog.title} {blog.author}
+            </Link>
+          </div>
         ))}
     </div>
   );

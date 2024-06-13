@@ -11,6 +11,7 @@ import { Route, Routes } from 'react-router-dom';
 import Users from './components/Users';
 import { initializeUsers } from './reducers/usersReducer';
 import UserProfile from './components/UserProfile';
+import Blog from './components/Blog';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -78,6 +79,7 @@ const App = () => {
             <Blogs blogs={blogs} notify={notify} loggedInUser={loggedInUser} />
           }
         />
+        <Route path='/:id' element={<Blog blogs={blogs} notify={notify} />} />
         <Route path='/users' element={<Users users={users} />} />
         <Route path='/users/:id' element={<UserProfile users={users} />} />
       </Routes>
