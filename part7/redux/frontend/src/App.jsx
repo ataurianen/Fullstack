@@ -1,19 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import LoginForm from './components/LoginForm';
-import Blog from './components/Blog';
 import Notification from './components/Notification';
 import { setNotification } from './reducers/notificationReducer';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  createBlog,
-  initializeBlogs,
-  deleteBlog,
-  likeBlog,
-} from './reducers/blogReducer';
-import NewBlogForm from './components/NewBlogForm';
+import { initializeBlogs } from './reducers/blogReducer';
 import Header from './components/Header';
-import Togglable from './components/Togglable';
+import Blogs from './components/Blogs';
 import { loadUser, logout, userLogIn } from './reducers/userReducer';
+import { Route, Routes } from 'react-router-dom';
+import Users from './components/Users';
+import { initializeUsers } from './reducers/usersReducer';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -22,18 +18,17 @@ const App = () => {
     dispatch(initializeBlogs());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(loadUser());
+    dispatch(initializeUsers());
+  }, []);
+
   const blogs = useSelector((state) => {
     const currentBlogs = state.blogs;
     return currentBlogs;
   });
 
   const loggedInUser = useSelector(({ user }) => user);
-
-  useEffect(() => {
-    dispatch(loadUser());
-  }, []);
-
-  const blogFormRef = useRef();
 
   const notify = (message, type = 'success') => {
     dispatch(setNotification({ message, type, time: 5 }));
@@ -50,23 +45,6 @@ const App = () => {
 
   const handleLogoutClick = () => {
     dispatch(logout());
-  };
-
-  const addBlog = async (blog) => {
-    dispatch(createBlog(blog, loggedInUser));
-    notify(`Blog created: ${blog.title} ${blog.author}`);
-    blogFormRef.current.toggleVisibility();
-  };
-
-  const updateLikes = async (blogToUpdate) => {
-    dispatch(likeBlog(blogToUpdate));
-    notify(`You liked ${blogToUpdate.title} by ${blogToUpdate.author}`);
-  };
-
-  const handleRemoveClick = async (blog) => {
-    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-      dispatch(deleteBlog(blog.id));
-    }
   };
 
   if (!loggedInUser) {
@@ -87,20 +65,15 @@ const App = () => {
         {loggedInUser.name} logged in
         <button onClick={handleLogoutClick}>logout</button>
       </div>
-      <Togglable buttonLabel='New Blog' ref={blogFormRef}>
-        <NewBlogForm createBlog={addBlog} />
-      </Togglable>
-
-      {blogs
-        .toSorted((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            removeBlog={handleRemoveClick}
-            updateLikes={updateLikes}
-          />
-        ))}
+      <Routes>
+        <Route
+          path='/'
+          element={
+            <Blogs blogs={blogs} notify={notify} loggedInUser={loggedInUser} />
+          }
+        />
+        <Route path='/users' element={<Users />} />
+      </Routes>
     </div>
   );
 };
