@@ -24,7 +24,6 @@ const Blog = ({ blogs, notify }) => {
   if (!blog) {
     return null;
   }
-
   const showRemoveButton = {
     display: blog.user.username === storage.me() ? '' : 'none',
   };
@@ -46,6 +45,13 @@ const Blog = ({ blogs, notify }) => {
         Remove
       </button>
       <div>{`added by ${blog.user.name}`}</div>
+
+      <h2>comments</h2>
+      <ul>
+        {blog.comments.map((comment) => (
+          <li>{comment}</li>
+        ))}
+      </ul>
     </div>
   );
 };
