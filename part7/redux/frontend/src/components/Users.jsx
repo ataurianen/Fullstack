@@ -1,12 +1,7 @@
 import { useSelector } from 'react-redux';
 import User from './User';
 
-const Users = () => {
-  const users = useSelector((state) => {
-    const currentUsers = state.users;
-    return currentUsers;
-  });
-
+const Users = ({ users }) => {
   return (
     <div>
       <h2>Users</h2>

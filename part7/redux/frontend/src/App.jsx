@@ -10,6 +10,7 @@ import { loadUser, logout, userLogIn } from './reducers/userReducer';
 import { Route, Routes } from 'react-router-dom';
 import Users from './components/Users';
 import { initializeUsers } from './reducers/usersReducer';
+import UserProfile from './components/UserProfile';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,11 @@ const App = () => {
   const blogs = useSelector((state) => {
     const currentBlogs = state.blogs;
     return currentBlogs;
+  });
+
+  const users = useSelector((state) => {
+    const currentUsers = state.users;
+    return currentUsers;
   });
 
   const loggedInUser = useSelector(({ user }) => user);
@@ -72,7 +78,8 @@ const App = () => {
             <Blogs blogs={blogs} notify={notify} loggedInUser={loggedInUser} />
           }
         />
-        <Route path='/users' element={<Users />} />
+        <Route path='/users' element={<Users users={users} />} />
+        <Route path='/users/:id' element={<UserProfile users={users} />} />
       </Routes>
     </div>
   );
