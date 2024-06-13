@@ -7,7 +7,7 @@ import { initializeBlogs } from './reducers/blogReducer';
 import Header from './components/Header';
 import Blogs from './components/Blogs';
 import { loadUser, logout, userLogIn } from './reducers/userReducer';
-import { Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import Users from './components/Users';
 import { initializeUsers } from './reducers/usersReducer';
 import UserProfile from './components/UserProfile';
@@ -64,14 +64,20 @@ const App = () => {
     );
   }
 
+  const navBarStyle = {
+    padding: 2,
+    background: 'lightgray',
+  };
+
   return (
     <div>
-      <Header text={'Blogs'} />
-      <Notification />
-      <div>
-        {loggedInUser.name} logged in
+      <div style={navBarStyle}>
+        <Link to='/'>blogs</Link> <Link to='/users'>users</Link>{' '}
+        {loggedInUser.name} logged in{' '}
         <button onClick={handleLogoutClick}>logout</button>
       </div>
+      <Header text={'Blogs'} />
+      <Notification />
       <Routes>
         <Route
           path='/'
