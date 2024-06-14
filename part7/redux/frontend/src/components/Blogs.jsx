@@ -33,7 +33,7 @@ const Blogs = ({ blogs, notify, loggedInUser }) => {
       {blogs
         .toSorted((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <div style={blogStyle}>
+          <div style={blogStyle} key={blog.id}>
             <Link to={`/${blog.id}`}>
               {blog.title} {blog.author}
             </Link>

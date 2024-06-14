@@ -1,9 +1,11 @@
 import storage from '../services/storage';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { deleteBlog, likeBlog } from '../reducers/blogReducer';
+import { deleteBlog, likeBlog, postComment } from '../reducers/blogReducer';
+import { useState } from 'react';
 
 const Blog = ({ blogs, notify }) => {
+  const [comment, setComment] = useState('');
   const id = useParams().id;
   const blog = blogs.find((b) => b.id === id);
 
@@ -21,9 +23,18 @@ const Blog = ({ blogs, notify }) => {
       navigate('/');
     }
   };
+
+  const addComment = (e) => {
+    e.preventDefault();
+    dispatch(postComment(id, comment));
+    setComment('');
+  };
+
   if (!blog) {
     return null;
   }
+  console.log(blog);
+
   const showRemoveButton = {
     display: blog.user.username === storage.me() ? '' : 'none',
   };
@@ -47,6 +58,10 @@ const Blog = ({ blogs, notify }) => {
       <div>{`added by ${blog.user.name}`}</div>
 
       <h2>comments</h2>
+      <form onSubmit={addComment}>
+        <input value={comment} onChange={(e) => setComment(e.target.value)} />{' '}
+        <button type='submit'>add Comment</button>
+      </form>
       <ul>
         {blog.comments.map((comment) => (
           <li>{comment}</li>
