@@ -4,6 +4,14 @@ import { useRef } from 'react';
 import { createBlog } from '../reducers/blogReducer';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Paper,
+} from '@mui/material';
 
 const Blogs = ({ blogs, notify, loggedInUser }) => {
   const dispatch = useDispatch();
@@ -29,16 +37,22 @@ const Blogs = ({ blogs, notify, loggedInUser }) => {
       <Togglable buttonLabel='New Blog' ref={blogFormRef}>
         <NewBlogForm createBlog={addBlog} />
       </Togglable>
-
-      {blogs
-        .toSorted((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <div style={blogStyle} key={blog.id}>
-            <Link to={`/${blog.id}`}>
-              {blog.title} {blog.author}
-            </Link>
-          </div>
-        ))}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableBody>
+            {blogs
+              .toSorted((a, b) => b.likes - a.likes)
+              .map((blog) => (
+                <TableRow style={blogStyle} key={blog.id}>
+                  <TableCell>
+                    <Link to={`/${blog.id}`}>{blog.title}</Link>
+                  </TableCell>
+                  <TableCell>{blog.author}</TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };

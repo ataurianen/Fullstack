@@ -12,6 +12,7 @@ import Users from './components/Users';
 import { initializeUsers } from './reducers/usersReducer';
 import UserProfile from './components/UserProfile';
 import Blog from './components/Blog';
+import { AppBar, Button, Container, IconButton, Toolbar } from '@mui/material';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -70,12 +71,23 @@ const App = () => {
   };
 
   return (
-    <div>
-      <div style={navBarStyle}>
-        <Link to='/'>blogs</Link> <Link to='/users'>users</Link>{' '}
-        {loggedInUser.name} logged in{' '}
-        <button onClick={handleLogoutClick}>logout</button>
-      </div>
+    <Container>
+      <AppBar position='static'>
+        <Toolbar>
+          <IconButton edge='start' color='inherit' aria-label='menu' />
+          <Button color='inherit' component={Link} to='/'>
+            Blogs
+          </Button>
+          <Button color='inherit' component={Link} to='/users'>
+            Users
+          </Button>
+          <em>{loggedInUser.name} logged in</em>
+          <Button color='inherit' onClick={handleLogoutClick}>
+            Logout
+          </Button>
+        </Toolbar>
+      </AppBar>
+
       <Header text={'Blogs'} />
       <Notification />
       <Routes>
@@ -89,7 +101,7 @@ const App = () => {
         <Route path='/users' element={<Users users={users} />} />
         <Route path='/users/:id' element={<UserProfile users={users} />} />
       </Routes>
-    </div>
+    </Container>
   );
 };
 

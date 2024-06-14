@@ -33,7 +33,6 @@ const Blog = ({ blogs, notify }) => {
   if (!blog) {
     return null;
   }
-  console.log(blog);
 
   const showRemoveButton = {
     display: blog.user.username === storage.me() ? '' : 'none',
