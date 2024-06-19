@@ -1,8 +1,11 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useMutation } from '@apollo/client';
 import { EDIT_AUTHOR, ALL_AUTHORS } from '../queries';
 
-const BirthYear = () => {
+import Select from 'react-select';
+
+const BirthYear = ({ authors }) => {
   const [year, setYear] = useState('');
   const [name, setName] = useState('');
 
@@ -29,10 +32,13 @@ const BirthYear = () => {
       <h2>Set Birthyear</h2>
       <form onSubmit={submit}>
         <div>
-          name{' '}
-          <input
+          <Select
             value={name}
-            onChange={({ target }) => setName(target.value)}
+            onChange={(option) => setName(option.value)}
+            options={authors.map((author) => ({
+              value: author.name,
+              label: author.name,
+            }))}
           />
         </div>
         <div>
