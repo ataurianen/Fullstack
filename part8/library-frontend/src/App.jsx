@@ -8,7 +8,6 @@ import { ALL_AUTHORS } from './queries';
 
 const App = () => {
   const result = useQuery(ALL_AUTHORS);
-  console.log(result.data);
 
   if (result.loading) {
     return <div>loading...</div>;
