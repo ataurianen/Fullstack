@@ -40,7 +40,6 @@ let authors = [
  * Podría tener más sentido asociar un libro con su autor almacenando la id del autor en el contexto del libro en lugar del nombre del autor
  * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conexión con el libro
  */
-
 let books = [
   {
     title: 'Clean Code',
@@ -115,7 +114,7 @@ const typeDefs = `
   type Author {
     name: String!
     born: Int
-    authorBookCount: Int!
+    bookCount: Int!
   }
 
   type Mutation {
@@ -163,7 +162,7 @@ const resolvers = {
     allAuthors: () => authors,
   },
   Author: {
-    authorBookCount: (root) => {
+    bookCount: (root) => {
       const counter = books.filter((book) => book.author === root.name);
       return counter.length;
     },

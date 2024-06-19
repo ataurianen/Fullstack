@@ -1,6 +1,5 @@
-const Authors = () => {
-  const authors = [];
-
+/* eslint-disable react/prop-types */
+const Authors = ({ authors }) => {
   return (
     <div>
       <h2>authors</h2>
