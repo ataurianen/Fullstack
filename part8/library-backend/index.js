@@ -89,7 +89,6 @@ const resolvers = {
     allBooks: async (root, args) => {
       if (!args.author && !args.genre) {
         const allBooks = await Book.find({}).populate('author');
-        console.log(allBooks);
         return allBooks;
       } else if (args.author && !args.genre) {
         const author = await Author.findOne({ name: args.author });
@@ -120,7 +119,6 @@ const resolvers = {
   Mutation: {
     addBook: async (root, args, context) => {
       const currentUser = context.currentUser;
-      console.log(currentUser);
 
       if (!currentUser) {
         throw new GraphQLError('not authenticated', {
