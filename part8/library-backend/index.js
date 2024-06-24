@@ -23,12 +23,6 @@ mongoose
 
 const typeDefs = `
 
-  type Book {
-    title: String!
-    published: Int!
-    author: Author!
-    genres: [String]!
-  }
   type Query {
     bookCount: Int!
     authorCount: Int!
@@ -36,10 +30,17 @@ const typeDefs = `
     allAuthors: [Author!]!
   }
 
+  type Book {
+    title: String!
+    published: Int!
+    author: Author!
+    genres: [String]!
+  }
+
   type Author {
     name: String!
     born: Int
-    bookCount: Int!
+    bookCount: Int
   }
 
   type Mutation {
@@ -65,7 +66,9 @@ const resolvers = {
     authorCount: async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       if (!args.author && !args.genre) {
-        return Book.find({});
+        const allBooks = await Book.find({}).populate('author');
+        console.log(allBooks);
+        return allBooks;
       } else if (args.author && !args.genre) {
         const author = await Author.findOne({ name: args.author });
         return await Book.find({ author: author._id });
@@ -98,7 +101,17 @@ const resolvers = {
 
       if (!author) {
         author = new Author({ name: args.author, born: null });
-        await author.save();
+        try {
+          await author.save();
+        } catch (error) {
+          throw new GraphQLError('Adding author failed', {
+            extensions: {
+              code: 'BAD_USER_INPUT',
+              invalidArgs: args.name,
+              error,
+            },
+          });
+        }
       }
       const newBook = new Book({
         title: args.title,
@@ -106,8 +119,17 @@ const resolvers = {
         published: args.published,
         genres: args.genres,
       });
-
-      await newBook.save();
+      try {
+        await newBook.save();
+      } catch (error) {
+        throw new GraphQLError('Adding book failed', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.name,
+            error,
+          },
+        });
+      }
 
       return newBook;
     },
