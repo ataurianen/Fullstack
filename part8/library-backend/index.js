@@ -39,7 +39,7 @@ const typeDefs = `
   type Author {
     name: String!
     born: Int
-    bookCount: Int
+    bookCount: Int!
   }
 
   type Mutation {
@@ -69,16 +69,29 @@ const resolvers = {
       } else if (args.author && !args.genre) {
         const author = await Author.findOne({ name: args.author });
         return await Book.find({ author: author._id });
+      } else if (!args.author && args.genre) {
+        return await Book.find({ genres: { $all: [args.genre] } });
+      } else {
+        const author = await Author.findOne({ name: args.author });
+        return await Book.find({
+          author: author._id,
+          genres: { $all: [args.genre] },
+        });
       }
     },
-    allAuthors: async () => Author.find({}),
-  },
-  Author: {
-    bookCount: (root) => {
-      const counter = books.filter((book) => book.author === root.name);
-      return counter.length;
+    allAuthors: async () => {
+      const allBooks = await Book.find({}).populate('author');
+      const allAuthors = await Author.find({});
+      return allAuthors.map((author) => ({
+        name: author.name,
+        born: author.born,
+        bookCount: allBooks.filter((book) => book.author.name === author.name)
+          .length,
+        id: author._id,
+      }));
     },
   },
+
   Mutation: {
     addBook: async (root, args) => {
       let author = await Author.findOne({ name: args.author });
@@ -98,17 +111,10 @@ const resolvers = {
 
       return newBook;
     },
-    editAuthor: (root, args) => {
-      const author = authors.find((author) => author.name === args.name);
-      if (!author) {
-        return null;
-      }
-
-      const updatedAuthor = { ...author, born: args.setBornTo };
-      authors = authors.map((author) =>
-        author.name === args.name ? updatedAuthor : author
-      );
-      return updatedAuthor;
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({ name: args.name });
+      author.born = args.setBornTo;
+      return author.save();
     },
   },
 };
