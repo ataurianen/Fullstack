@@ -8,14 +8,15 @@ interface Result {
   average: number;
 }
 
-const calculateExercises = (
-  dailyExercise: Array<number>,
+export const calculateExercises = (
+  dailyExercise: number[],
   target: number
 ): Result => {
-  const periodLength = dailyExercise.length;
-  const trainingDays = dailyExercise.filter((day) => day > 0).length;
-  const average = dailyExercise.reduce((a, b) => a + b) / periodLength;
-  const success = average >= target;
+  const periodLength: number = dailyExercise.length;
+  const trainingDays: number = dailyExercise.filter((day) => day > 0).length;
+  const average: number =
+    dailyExercise.reduce((a, b) => a + b, 0) / periodLength;
+  const success: boolean = average >= target;
   let rating = 1;
   if (trainingDays > 0) {
     rating = success ? 3 : 2;
