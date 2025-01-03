@@ -1,0 +1,6 @@
+apt-get -y install curl
+curl -sL https://deb.nodesource.com/setup_20.x | bash
+apt install -y nodejs
+
+root@e77ec689271a:/# node /usr/src/app/index.js 
+Hello World
